@@ -12,7 +12,7 @@ import AdminGlassTab from "../components/admin/AdminGlassTab";
 import AdminQuotesTab from "../components/admin/AdminQuotesTab";
 import AdminCustomOrdersTab from "../components/admin/AdminCustomOrdersTab";
 
-const ADMIN_PASSWORD = "leader2024";
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "admin2020";
 
 function PasswordGate({ onUnlock }) {
   const [pwd, setPwd] = useState("");
@@ -81,7 +81,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="font-playfair text-2xl font-bold">Admin Dashboard</h1>
-              <p className="text-primary-foreground/70 text-sm mt-1">Leader Glazier and Furniture — Owner Panel</p>
+              <p className="text-primary-foreground/70 text-sm mt-1">Craftsman Galore — Owner Panel</p>
             </div>
             <Link to="/">
               <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">

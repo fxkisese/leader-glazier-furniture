@@ -1,5 +1,5 @@
 -- ============================================================
--- Leader Glazier & Furniture — Supabase Schema
+-- Craftsman Galore — Supabase Schema
 -- Run this in your Supabase SQL editor
 -- ============================================================
 

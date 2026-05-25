@@ -10,7 +10,7 @@ export default function Contact() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
 
-  const waMsg = `Hello Leader Glazier and Furniture,\n\nMy name is ${form.name}.\nPhone: ${form.phone}\nEmail: ${form.email}\n\nMessage: ${form.message}`;
+  const waMsg = `Hello Craftsman Galore,\n\nMy name is ${form.name}.\nPhone: ${form.phone}\nEmail: ${form.email}\n\nMessage: ${form.message}`;
 
   const handleSend = () => {
     if (!form.name || !form.message) return;
@@ -38,7 +38,7 @@ export default function Contact() {
                 {[
                   { icon: MessageCircle, title: "WhatsApp (Fastest)", value: "+254 722 914 819", href: `https://wa.me/${WHATSAPP}`, color: "text-green-600", bg: "bg-green-50" },
                   { icon: Phone, title: "Phone Call", value: "+254 722 914 819", href: `tel:+${WHATSAPP}`, color: "text-primary", bg: "bg-primary/5" },
-                  { icon: Mail, title: "Email", value: "info@leaderglazierfurniture.co.ke", href: "mailto:info@leaderglazierfurniture.co.ke", color: "text-primary", bg: "bg-primary/5" },
+                  { icon: Mail, title: "Email", value: "info@craftsmansgalore.co.ke", href: "mailto:info@craftsmansgalore.co.ke", color: "text-primary", bg: "bg-primary/5" },
                   { icon: MapPin, title: "Location", value: "Nairobi, Kenya — Delivery across Nairobi", href: null, color: "text-primary", bg: "bg-primary/5" },
                 ].map(({ icon: Icon, title, value, href, color, bg }) => (
                   <div key={title} className="flex items-start gap-4 p-4 rounded-2xl border border-border hover:border-primary/20 transition-colors">
@@ -61,7 +61,7 @@ export default function Contact() {
             <div className="bg-primary rounded-3xl p-6 text-primary-foreground space-y-3">
               <h3 className="font-playfair font-bold text-xl">Quick WhatsApp Message</h3>
               <p className="text-primary-foreground/70 text-sm">The fastest way to reach us is on WhatsApp. We typically respond within minutes during business hours.</p>
-              <a href={`https://wa.me/${WHATSAPP}?text=Hello%20Leader%20Glazier%20and%20Furniture,%20I%20need%20help%20with%20a%20quote.`} target="_blank" rel="noopener noreferrer">
+              <a href={`https://wa.me/${WHATSAPP}?text=Hello%20Craftsman%20Galore,%20I%20need%20help%20with%20a%20quote.`} target="_blank" rel="noopener noreferrer">
                 <Button className="bg-green-500 hover:bg-green-400 text-white gap-2">
                   <MessageCircle className="w-4 h-4" /> Open WhatsApp Chat
                 </Button>

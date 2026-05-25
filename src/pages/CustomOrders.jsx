@@ -47,7 +47,7 @@ export default function CustomOrders() {
   });
 
   if (submitted) {
-    const waMsg = `Hello Leader Glazier and Furniture, I have a custom order request:\n\nProduct: ${form.product_type}\nMeasurements: ${form.measurements}\nMaterial: ${form.preferred_material}\nBudget: ${form.budget}\nLocation: ${form.location}\nDescription: ${form.description}\n\nMy name: ${form.customer_name}\nPhone: ${form.phone}`;
+    const waMsg = `Hello Craftsman Galore, I have a custom order request:\n\nProduct: ${form.product_type}\nMeasurements: ${form.measurements}\nMaterial: ${form.preferred_material}\nBudget: ${form.budget}\nLocation: ${form.location}\nDescription: ${form.description}\n\nMy name: ${form.customer_name}\nPhone: ${form.phone}`;
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center space-y-6 bg-white rounded-3xl border border-border p-10 shadow-xl">

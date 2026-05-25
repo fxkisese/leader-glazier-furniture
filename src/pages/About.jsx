@@ -11,7 +11,7 @@ export default function About() {
             <div className="bg-gradient-to-br from-primary to-[hsl(270,60%,35%)] text-primary-foreground">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 text-center">
                     <p className="text-gold text-sm font-medium uppercase tracking-widest mb-3">Our Story</p>
-                    <h1 className="font-playfair text-3xl lg:text-5xl font-bold mb-6">About Leader Glazier & Furniture</h1>
+                    <h1 className="font-playfair text-3xl lg:text-5xl font-bold mb-6">About Craftsman Galore</h1>
                     <p className="text-primary-foreground/80 text-lg leading-relaxed max-w-2xl mx-auto">
                         We are Nairobi's trusted source for premium furniture and professional glass solutions. From custom sofas to office glass partitions, we bring quality craftsmanship to every project.
                     </p>
@@ -24,7 +24,7 @@ export default function About() {
                     <div className="space-y-6">
                         <h2 className="font-playfair text-3xl font-bold text-foreground">Quality You Can See</h2>
                         <p className="text-muted-foreground leading-relaxed">
-                            Leader Glazier and Furniture was founded with one goal — to make it easy for Nairobi homes and businesses to access premium furniture and professional glass works at transparent prices.
+                            Craftsman Galore was founded with one goal — to make it easy for Nairobi homes and businesses to access premium handcrafted furniture and artisan solutions at transparent prices.
                         </p>
                         <p className="text-muted-foreground leading-relaxed">
                             We stock a wide range of ready-made furniture and accept custom orders for pieces built to your exact specifications. Our glass team handles everything from bathroom mirrors to full office glass partitions.

@@ -21,7 +21,7 @@ import AdminExpensesTab from "../components/admin/AdminExpensesTab";
 import AdminAccessoriesTab from "../components/admin/AdminAccessoriesTab";
 import AdminSettingsTab from "../components/admin/AdminSettingsTab";
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "leader2024";
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "admin2020";
 
 const BRANCHES = [
   { id: "all", label: "All Branches" },
@@ -51,7 +51,7 @@ function PasswordGate({ onUnlock }) {
         </div>
         <div>
           <h2 className="font-playfair text-2xl font-bold text-foreground">Admin Access</h2>
-          <p className="text-muted-foreground text-sm mt-1">Leader Glazier & Furniture</p>
+          <p className="text-muted-foreground text-sm mt-1">Craftsman Galore</p>
         </div>
         <form onSubmit={submit} className="space-y-3">
           <Input
@@ -106,7 +106,7 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="font-playfair text-xl font-bold">Admin Dashboard</h1>
-              <p className="text-primary-foreground/70 text-sm mt-0.5">Leader Glazier and Furniture</p>
+              <p className="text-primary-foreground/70 text-sm mt-0.5">Craftsman Galore</p>
             </div>
             <div className="flex items-center gap-3">
               {showBranchFilter && (
