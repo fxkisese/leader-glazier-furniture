@@ -1,0 +1,289 @@
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calculator, MessageCircle, Phone, Save, MapPin } from "lucide-react";
+import { toast } from "sonner";
+
+const WHATSAPP = "254700000000";
+
+const SAMPLE_GLASS = [
+  { id: "mirror", name: "Mirror Glass", price_per_sqft: 700, installation_price: 2000, frame_price_per_sqft: 150 },
+  { id: "clear", name: "Clear Float Glass", price_per_sqft: 450, installation_price: 1500 },
+  { id: "toughened", name: "Toughened Glass", price_per_sqft: 850, installation_price: 2500 },
+  { id: "frosted", name: "Frosted Glass", price_per_sqft: 650, installation_price: 2000 },
+  { id: "shower", name: "Shower Glass", price_per_sqft: 1100, installation_price: 3500 },
+  { id: "office-partition", name: "Office Partition Glass", price_per_sqft: 950, installation_price: 3000 },
+  { id: "tinted", name: "Tinted Glass", price_per_sqft: 600, installation_price: 1800 },
+  { id: "decorative", name: "Decorative Glass", price_per_sqft: 800, installation_price: 2500 },
+];
+
+const UNITS = [
+  { value: "feet", label: "Feet (ft)", factor: 1 },
+  { value: "inches", label: "Inches (in)", factor: 1 / 144 },
+  { value: "cm", label: "Centimeters (cm)", factor: 1 / 929.03 },
+  { value: "meters", label: "Meters (m)", factor: 10.7639 },
+];
+
+export default function QuoteCalculator() {
+  const [glassId, setGlassId] = useState("");
+  const [width, setWidth] = useState("");
+  const [height, setHeight] = useState("");
+  const [unit, setUnit] = useState("feet");
+  const [qty, setQty] = useState("1");
+  const [includeInstall, setIncludeInstall] = useState(false);
+  const [includeFrame, setIncludeFrame] = useState(false);
+  const [includeDelivery, setIncludeDelivery] = useState(false);
+  const [deliveryLocation, setDeliveryLocation] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [quote, setQuote] = useState(null);
+
+  const { data: glassTypes = [] } = useQuery({
+    queryKey: ["glass-types"],
+    queryFn: () => base44.entities.GlassType.filter({ is_available: true }),
+  });
+
+  const options = glassTypes.length > 0 ? glassTypes : SAMPLE_GLASS;
+
+  // Pre-select from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const g = params.get("glass");
+    if (g) {
+      const found = options.find((o) => o.name === g);
+      if (found) setGlassId(found.id || found.name);
+    }
+  }, [options]);
+
+  const calculate = () => {
+    const selected = options.find((g) => g.id === glassId || g.name === glassId);
+    if (!selected || !width || !height) { toast.error("Please fill in glass type, width, and height."); return; }
+
+    const unitFactor = UNITS.find((u) => u.value === unit)?.factor || 1;
+    const areaSqft = parseFloat(width) * parseFloat(height) * unitFactor;
+    const quantity = parseInt(qty) || 1;
+    const glassCost = areaSqft * selected.price_per_sqft * quantity;
+    const installCost = includeInstall ? (selected.installation_price || 2000) : 0;
+    const frameCost = includeFrame ? (selected.frame_price_per_sqft || 150) * areaSqft * quantity : 0;
+    const deliveryCost = includeDelivery ? 1000 : 0;
+    const total = glassCost + installCost + frameCost + deliveryCost;
+
+    setQuote({
+      glassName: selected.name,
+      width: parseFloat(width),
+      height: parseFloat(height),
+      unit,
+      areaSqft: areaSqft.toFixed(2),
+      ppsf: selected.price_per_sqft,
+      quantity,
+      glassCost: Math.round(glassCost),
+      installCost: Math.round(installCost),
+      frameCost: Math.round(frameCost),
+      deliveryCost,
+      total: Math.round(total),
+      includeInstall,
+      includeFrame,
+      includeDelivery,
+      deliveryLocation,
+    });
+  };
+
+  const saveQuoteMutation = useMutation({
+    mutationFn: () => base44.entities.QuoteRequest.create({
+      customer_name: customerName,
+      phone,
+      glass_type_name: quote.glassName,
+      width: quote.width,
+      height: quote.height,
+      unit: quote.unit,
+      area_sqft: parseFloat(quote.areaSqft),
+      quantity: quote.quantity,
+      include_installation: quote.includeInstall,
+      include_frame: quote.includeFrame,
+      include_delivery: quote.includeDelivery,
+      delivery_location: deliveryLocation,
+      estimated_total: quote.total,
+    }),
+    onSuccess: () => toast.success("Quote saved! We'll be in touch."),
+  });
+
+  const waText = quote
+    ? `Hello Leader Glazier and Furniture, I would like a quote for:\n\nGlass Type: ${quote.glassName}\nSize: ${quote.width}${quote.unit} × ${quote.height}${quote.unit}\nArea: ${quote.areaSqft} sq ft\nQuantity: ${quote.quantity}\nInstallation: ${quote.includeInstall ? "Yes" : "No"}\nFrame: ${quote.includeFrame ? "Yes" : "No"}\nDelivery: ${quote.includeDelivery ? "Yes" : "No"}${deliveryLocation ? ` — ${deliveryLocation}` : ""}\nEstimated Total: KSh ${quote.total?.toLocaleString()}\n\nMy name is: ${customerName || "[name]"}\nPhone: ${phone || "[phone]"}`
+    : "";
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="bg-gradient-to-br from-[#f8f5ff] to-white border-b border-border">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14 text-center">
+          <p className="text-gold text-sm font-medium uppercase tracking-widest mb-2">Instant Pricing Tool</p>
+          <h1 className="font-playfair text-3xl lg:text-4xl font-bold text-foreground">Glass & Mirror Quote Calculator</h1>
+          <p className="text-muted-foreground mt-3 max-w-lg mx-auto">Select your glass type, enter measurements, and get an estimated price in seconds.</p>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Calculator */}
+          <div className="space-y-5">
+            <div className="bg-white rounded-2xl border border-border p-6 space-y-5">
+              <h2 className="font-semibold text-foreground flex items-center gap-2"><Calculator className="w-5 h-5 text-primary" /> Your Glass Details</h2>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">Glass / Mirror Type *</label>
+                <Select value={glassId} onValueChange={setGlassId}>
+                  <SelectTrigger><SelectValue placeholder="Select glass type" /></SelectTrigger>
+                  <SelectContent>
+                    {options.map((g) => (
+                      <SelectItem key={g.id || g.name} value={g.id || g.name}>
+                        {g.name} — KSh {g.price_per_sqft?.toLocaleString()}/sq ft
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">Unit of Measurement</label>
+                <Select value={unit} onValueChange={setUnit}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{UNITS.map((u) => <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Width *</label>
+                  <Input value={width} onChange={(e) => setWidth(e.target.value)} type="number" placeholder="4" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Height *</label>
+                  <Input value={height} onChange={(e) => setHeight(e.target.value)} type="number" placeholder="6" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Quantity</label>
+                  <Input value={qty} onChange={(e) => setQty(e.target.value)} type="number" min="1" placeholder="1" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium block">Add-ons</label>
+                {[
+                  { key: "includeInstall", label: "Professional Installation", state: includeInstall, set: setIncludeInstall },
+                  { key: "includeFrame", label: "Include Frame", state: includeFrame, set: setIncludeFrame },
+                  { key: "includeDelivery", label: "Delivery to My Location", state: includeDelivery, set: setIncludeDelivery },
+                ].map((opt) => (
+                  <label key={opt.key} className="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-border hover:border-primary/30 hover:bg-accent/20 transition-colors">
+                    <input type="checkbox" checked={opt.state} onChange={(e) => opt.set(e.target.checked)} className="w-4 h-4 accent-primary" />
+                    <span className="text-sm">{opt.label}</span>
+                  </label>
+                ))}
+                {includeDelivery && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <Input value={deliveryLocation} onChange={(e) => setDeliveryLocation(e.target.value)} placeholder="Your delivery location" />
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Your Name</label>
+                  <Input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Optional" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Phone Number</label>
+                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="07XX XXX XXX" />
+                </div>
+              </div>
+
+              <Button onClick={calculate} className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl h-12 gap-2 text-base font-semibold">
+                <Calculator className="w-5 h-5" /> Calculate My Quote
+              </Button>
+            </div>
+          </div>
+
+          {/* Quote Result */}
+          <div>
+            {quote ? (
+              <div className="bg-white rounded-2xl border-2 border-primary/20 p-6 space-y-4 shadow-xl shadow-primary/5">
+                <div className="text-center pb-4 border-b border-border">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Your Glass Quote</p>
+                  <h3 className="font-playfair text-2xl font-bold text-foreground mt-1">{quote.glassName}</h3>
+                </div>
+
+                <div className="space-y-2 text-sm">
+                  {[
+                    ["Size", `${quote.width} × ${quote.height} ${quote.unit}`],
+                    ["Area", `${quote.areaSqft} sq ft`],
+                    ["Price per sq ft", `KSh ${quote.ppsf?.toLocaleString()}`],
+                    ["Quantity", quote.quantity],
+                    ["Glass Cost", `KSh ${quote.glassCost?.toLocaleString()}`],
+                    ...(quote.installCost > 0 ? [["Installation", `+ KSh ${quote.installCost?.toLocaleString()}`]] : []),
+                    ...(quote.frameCost > 0 ? [["Frame", `+ KSh ${quote.frameCost?.toLocaleString()}`]] : []),
+                    ...(quote.deliveryCost > 0 ? [["Delivery", `+ KSh ${quote.deliveryCost?.toLocaleString()}`]] : []),
+                  ].map(([k, v]) => (
+                    <div key={k} className="flex justify-between py-1 border-b border-border/50">
+                      <span className="text-muted-foreground">{k}</span>
+                      <span className="font-medium">{v}</span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between py-3 text-lg font-bold">
+                    <span className="text-foreground">Estimated Total</span>
+                    <span className="text-primary">KSh {quote.total?.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3 leading-relaxed">
+                  ⚠️ This is an estimated quote. Final pricing may vary depending on confirmed measurements, installation complexity, frame choice, and delivery location.
+                </p>
+
+                <div className="space-y-2 pt-2">
+                  <a href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(waText)}`} target="_blank" rel="noopener noreferrer">
+                    <Button className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl gap-2">
+                      <MessageCircle className="w-4 h-4" /> Send Quote to WhatsApp
+                    </Button>
+                  </a>
+                  <div className="grid grid-cols-2 gap-2">
+                    <a href={`tel:+${WHATSAPP}`}>
+                      <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white rounded-xl gap-1 text-sm">
+                        <Phone className="w-4 h-4" /> Call Now
+                      </Button>
+                    </a>
+                    <Button variant="outline" className="border-primary/30 text-primary hover:bg-accent rounded-xl gap-1 text-sm"
+                      onClick={() => saveQuoteMutation.mutate()} disabled={saveQuoteMutation.isPending}>
+                      <Save className="w-4 h-4" /> {saveQuoteMutation.isPending ? "Saving..." : "Save Quote"}
+                    </Button>
+                  </div>
+                  <a href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hello Leader Glazier and Furniture, I would like to request a site visit for glass measurement and installation.")}`} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="w-full border-border text-foreground hover:border-primary hover:text-primary rounded-xl text-sm">
+                      Request Site Visit
+                    </Button>
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gradient-to-br from-[#f8f5ff] to-accent/20 rounded-2xl border border-border p-8 text-center space-y-4">
+                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
+                  <Calculator className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="font-playfair text-xl font-bold text-foreground">How it works</h3>
+                <ol className="text-sm text-muted-foreground space-y-2 text-left max-w-xs mx-auto">
+                  {["Select your glass or mirror type", "Enter width and height", "Choose your unit (feet, cm, etc.)", "Add installation or delivery if needed", "Click Calculate for instant estimate", "Send the quote directly to WhatsApp"].map((step, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="w-5 h-5 bg-primary/10 text-primary rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i + 1}</span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

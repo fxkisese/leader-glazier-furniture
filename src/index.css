@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 99%;
+    --foreground: 270 10% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 270 10% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 270 10% 12%;
+    --primary: 270 60% 28%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 270 30% 95%;
+    --secondary-foreground: 270 60% 28%;
+    --muted: 270 15% 96%;
+    --muted-foreground: 270 10% 50%;
+    --accent: 270 40% 90%;
+    --accent-foreground: 270 60% 28%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 270 20% 90%;
+    --input: 270 20% 90%;
+    --ring: 270 60% 28%;
+    --radius: 0.75rem;
+    --gold: 43 74% 60%;
+    --gold-foreground: 270 10% 12%;
+
+    --font-playfair: 'Playfair Display', serif;
+    --font-inter: 'Inter', sans-serif;
+  }
+
+  .dark {
+    --background: 270 20% 8%;
+    --foreground: 270 10% 96%;
+    --card: 270 20% 11%;
+    --card-foreground: 270 10% 96%;
+    --popover: 270 20% 11%;
+    --popover-foreground: 270 10% 96%;
+    --primary: 270 50% 60%;
+    --primary-foreground: 270 20% 8%;
+    --secondary: 270 15% 18%;
+    --secondary-foreground: 270 10% 96%;
+    --muted: 270 15% 16%;
+    --muted-foreground: 270 10% 60%;
+    --accent: 270 20% 20%;
+    --accent-foreground: 270 10% 96%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 270 15% 20%;
+    --input: 270 15% 20%;
+    --ring: 270 50% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-inter;
+  }
+}
+
+@layer utilities {
+  .font-playfair {
+    font-family: var(--font-playfair);
+  }
+  .font-inter {
+    font-family: var(--font-inter);
+  }
+  .text-gold {
+    color: hsl(var(--gold));
+  }
+  .bg-gold {
+    background-color: hsl(var(--gold));
+  }
+  .border-gold {
+    border-color: hsl(var(--gold));
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.4);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.7);
+}
+
+/* Fade up animation */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fadeUp 0.6s ease forwards;
+}
+
+/* Count up animation */
+@keyframes countUp {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
