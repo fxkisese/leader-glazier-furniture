@@ -11,7 +11,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <div>
-              <h3 className="font-playfair font-bold text-2xl text-white">Leader Glazier</h3>
+              <h3 className="font-playfair font-bold text-2xl text-white">Craftsman Galore</h3>
               <p className="text-gold text-sm font-medium tracking-widest uppercase">& Furniture</p>
             </div>
             <p className="text-primary-foreground/70 text-sm leading-relaxed">
@@ -73,7 +73,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/10 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-primary-foreground/50">
-          <p>© 2026 Leader Glazier and Furniture. All rights reserved.</p>
+          <p>© 2026 Craftsman Galore. All rights reserved.</p>
           <div className="flex gap-4">
             <Link to="/about" className="hover:text-gold transition-colors">About</Link>
             <Link to="/contact" className="hover:text-gold transition-colors">Contact</Link>

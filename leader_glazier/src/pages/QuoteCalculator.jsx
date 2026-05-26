@@ -173,7 +173,7 @@ export default function QuoteCalculator() {
   });
 
   const waText = quote
-    ? `Hello Leader Glazier and Furniture, I would like a quote for:\n\n` +
+    ? `Hello Craftsman Galore, I would like a quote for:\n\n` +
       `Glass Type: ${quote.glassName}\n` +
       `Size: ${quote.width}${quote.unit} × ${quote.height}${quote.unit}\n` +
       `Area: ${quote.areaSqft} sq ft\n` +
@@ -409,7 +409,7 @@ export default function QuoteCalculator() {
                   >
                     <Save className="w-4 h-4" /> {saveQuoteMutation.isPending ? "Saving..." : "Save Quote"}
                   </Button>
-                  <a href={`https://wa.me/${companyPhone}?text=${encodeURIComponent("Hello Leader Glazier and Furniture, I would like to request a site visit for glass measurement and installation.")}`} target="_blank" rel="noopener noreferrer">
+                  <a href={`https://wa.me/${companyPhone}?text=${encodeURIComponent("Hello Craftsman Galore, I would like to request a site visit for furniture measurement and consultation.")}`} target="_blank" rel="noopener noreferrer">
                     <Button variant="outline" className="w-full border-border text-foreground hover:border-primary hover:text-primary rounded-xl text-sm">
                       Request Site Visit
                     </Button>

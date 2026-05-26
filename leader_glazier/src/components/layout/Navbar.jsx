@@ -35,7 +35,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 lg:h-18">
           {/* Logo */}
           <Link to="/" className="flex flex-col leading-tight">
-            <span className="font-playfair font-bold text-primary text-lg lg:text-xl tracking-tight">Leader Glazier</span>
+            <span className="font-playfair font-bold text-primary text-lg lg:text-xl tracking-tight">Craftsman Galore</span>
             <span className="text-xs text-gold font-inter font-medium tracking-widest uppercase">& Furniture</span>
           </Link>
 

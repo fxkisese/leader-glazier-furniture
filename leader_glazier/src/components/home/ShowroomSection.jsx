@@ -51,12 +51,12 @@ export default function ShowroomSection() {
             <div className="relative rounded-2xl overflow-hidden aspect-[4/3] group">
               <img
                 src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=600&fit=crop&q=85"
-                alt="Leader Glazier & Furniture Showroom"
+                alt="Craftsman Galore Showroom"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-6">
-                <p className="text-white font-playfair text-lg font-semibold">Leader Glazier & Furniture</p>
+                <p className="text-white font-playfair text-lg font-semibold">Craftsman Galore</p>
                 <p className="text-white/60 text-sm mt-1">Premium showroom — Nairobi & Machakos</p>
               </div>
             </div>

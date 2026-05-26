@@ -10,7 +10,7 @@ export default function ProductQuickView({ product, onClose }) {
   const images = product.images || [];
 
   const waMessage = product.whatsapp_message
-    || `Hello Leader Glazier and Furniture, I'm interested in the *${product.name}* (KSh ${product.price?.toLocaleString()}). Please share more details.`;
+    || `Hello Craftsman Galore, I'm interested in the *${product.name}* (KSh ${product.price?.toLocaleString()}). Please share more details.`;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={onClose}>

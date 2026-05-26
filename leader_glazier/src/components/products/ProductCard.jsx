@@ -17,7 +17,7 @@ export default function ProductCard({ product }) {
   const [showQuickView, setShowQuickView] = useState(false);
 
   const waMessage = product.whatsapp_message
-    || `Hello Leader Glazier and Furniture, I'm interested in the *${product.name}* (KSh ${product.price?.toLocaleString()}). Please share more details.`;
+    || `Hello Craftsman Galore, I'm interested in the *${product.name}* (KSh ${product.price?.toLocaleString()}). Please share more details.`;
 
   const labelConf = LABEL_CONFIG[product.label];
 

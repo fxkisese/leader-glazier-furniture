@@ -5,7 +5,7 @@ import { base44 } from "@/api/base44Client";
 const SAMPLE_REVIEWS = [
   { id: "1", customer_name: "James Mwangi", rating: 5, comment: "Ordered a custom 5-seater sofa. Quality is exceptional and delivery was on time. The purple velvet finish is exactly what I wanted.", product_type: "Custom Sofa" },
   { id: "2", customer_name: "Sarah Otieno", rating: 5, comment: "Got mirror glass cut for my bathroom. The glass quote calculator made it so easy to know the price before ordering. Very professional service.", product_type: "Mirror Glass" },
-  { id: "3", customer_name: "David Kimani", rating: 5, comment: "Furnished my entire office — desks, chairs, and glass partitions. Leader Glazier delivered everything in one go. Highly recommend.", product_type: "Office Furniture & Glass" },
+  { id: "3", customer_name: "David Kimani", rating: 5, comment: "Furnished my entire office — desks, chairs, and custom pieces. Craftsman Galore delivered everything perfectly. Highly recommend.", product_type: "Office Furniture & Crafts" },
 ];
 
 export default function ReviewsSection() {
