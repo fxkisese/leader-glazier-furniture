@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { X, Upload, Trash2, Star } from "lucide-react";
+import { X, Upload, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { base44 } from "@/api/base44Client";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/api/supabaseClient";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -39,6 +38,7 @@ export default function AddProductModal({ product, onClose, onSaved }) {
 
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
+    if (!files.length) return;
     setUploading(true);
     try {
       const uploadedUrls = [];
@@ -47,42 +47,60 @@ export default function AddProductModal({ product, onClose, onSaved }) {
         const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
         const filePath = `products/${fileName}`;
 
-        const { error } = await supabase.storage
+        console.log('[Product Upload] Starting upload:', file.name);
+        const { error: uploadError } = await supabase.storage
           .from('craftsman-images')
           .upload(filePath, file);
 
-        if (error) throw error;
+        if (uploadError) throw uploadError;
 
         const { data } = supabase.storage
           .from('craftsman-images')
           .getPublicUrl(filePath);
 
+        console.log('[Product Upload] Success:', data.publicUrl);
         uploadedUrls.push(data.publicUrl);
       }
-      set("images", [...form.images, ...uploadedUrls]);
+      setForm((f) => ({ ...f, images: [...f.images, ...uploadedUrls] }));
       toast.success(`Uploaded ${files.length} image(s)!`);
     } catch (error) {
       console.error('[Product Upload] Error:', error);
       toast.error("Upload failed: " + (error.message || "Unknown error"));
     } finally {
       setUploading(false);
+      // Reset input so same file can be re-uploaded if needed
+      e.target.value = "";
     }
   };
 
   const removeImage = (i) => set("images", form.images.filter((_, idx) => idx !== i));
 
   const saveMutation = useMutation({
-    mutationFn: () => {
-      const data = { ...form, price: parseFloat(form.price), discount_price: form.discount_price ? parseFloat(form.discount_price) : undefined };
-      return isEdit ? base44.entities.Product.update(product.id, data) : base44.entities.Product.create(data);
+    mutationFn: async () => {
+      const data = {
+        ...form,
+        price: parseFloat(form.price),
+        discount_price: form.discount_price ? parseFloat(form.discount_price) : null,
+      };
+      if (isEdit) {
+        const { error } = await supabase.from('products').update(data).eq('id', product.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('products').insert(data);
+        if (error) throw error;
+      }
     },
     onSuccess: () => { toast.success(isEdit ? "Product updated!" : "Product added!"); onSaved(); },
-    onError: () => toast.error("Something went wrong. Please try again."),
+    onError: (err) => toast.error("Something went wrong: " + (err.message || "Please try again.")),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => base44.entities.Product.delete(product.id),
+    mutationFn: async () => {
+      const { error } = await supabase.from('products').delete().eq('id', product.id);
+      if (error) throw error;
+    },
     onSuccess: () => { toast.success("Product deleted."); onSaved(); },
+    onError: (err) => toast.error("Delete failed: " + (err.message || "Please try again.")),
   });
 
   return (
@@ -110,7 +128,7 @@ export default function AddProductModal({ product, onClose, onSaved }) {
               <label className="w-20 h-20 rounded-xl border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center cursor-pointer transition-colors bg-muted/30 hover:bg-accent/20">
                 <Upload className="w-5 h-5 text-muted-foreground" />
                 <span className="text-[10px] text-muted-foreground mt-1">{uploading ? "..." : "Upload"}</span>
-                <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
+                <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" disabled={uploading} />
               </label>
             </div>
           </div>
