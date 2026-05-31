@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
+import { supabase } from "@/lib/supabaseClient";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -40,12 +41,25 @@ export default function AddProductModal({ product, onClose, onSaved }) {
     const files = Array.from(e.target.files);
     setUploading(true);
     try {
+      const uploadedUrls = [];
       for (const file of files) {
-        console.log('[Product Upload] Starting upload:', file.name);
-        const result = await base44.integrations.Core.UploadFile({ file });
-        console.log('[Product Upload] Success:', result.file_url);
-        set("images", [...form.images, result.file_url]);
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+        const filePath = `products/${fileName}`;
+
+        const { error } = await supabase.storage
+          .from('craftsman-images')
+          .upload(filePath, file);
+
+        if (error) throw error;
+
+        const { data } = supabase.storage
+          .from('craftsman-images')
+          .getPublicUrl(filePath);
+
+        uploadedUrls.push(data.publicUrl);
       }
+      set("images", [...form.images, ...uploadedUrls]);
       toast.success(`Uploaded ${files.length} image(s)!`);
     } catch (error) {
       console.error('[Product Upload] Error:', error);
