@@ -28,7 +28,7 @@ export default function ProductCard({ product }) {
         onClick={() => setShowQuickView(true)}
       >
         {/* Image */}
-        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+        <div className="relative aspect-square overflow-hidden bg-muted/30">
           {product.images?.[0] ? (
             <img
               src={product.images[0]}
