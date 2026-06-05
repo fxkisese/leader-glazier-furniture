@@ -3,15 +3,27 @@ import { X, Upload, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/api/supabaseClient";
 import { uploadImage } from "@/api/imageUpload";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const CATEGORIES = ["sofas","tv-stands","shoe-racks","wardrobes","beds","coffee-tables","dining-sets","office-desks","office-chairs","cabinets","chest-of-drawers","custom-furniture"];
-const LABELS = [{ v: "none", l: "None" }, { v: "new-arrival", l: "New Arrival" }, { v: "best-seller", l: "Best Seller" }, { v: "limited-offer", l: "Limited Offer" }, { v: "custom-order", l: "Custom Order" }];
+const LABELS = [{ v: "", l: "None" }, { v: "new-arrival", l: "New Arrival" }, { v: "best-seller", l: "Best Seller" }, { v: "limited-offer", l: "Limited Offer" }, { v: "custom-order", l: "Custom Order" }];
 const STOCK = ["in-stock", "out-of-stock", "made-to-order"];
+
+// Native select styled to match the design
+function NativeSelect({ value, onChange, children, className = "" }) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`flex h-9 w-full items-center rounded-md border border-input bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring capitalize ${className}`}
+    >
+      {children}
+    </select>
+  );
+}
 
 export default function AddProductModal({ product, onClose, onSaved }) {
   const isEdit = !!product;
@@ -127,10 +139,9 @@ export default function AddProductModal({ product, onClose, onSaved }) {
             </div>
             <div>
               <label className="text-sm font-medium mb-1 block">Category *</label>
-              <Select value={form.category} onValueChange={(v) => set("category", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c.replace(/-/g, " ")}</SelectItem>)}</SelectContent>
-              </Select>
+              <NativeSelect value={form.category} onChange={(v) => set("category", v)}>
+                {CATEGORIES.map((c) => <option key={c} value={c}>{c.replace(/-/g, " ")}</option>)}
+              </NativeSelect>
             </div>
           </div>
 
@@ -152,7 +163,7 @@ export default function AddProductModal({ product, onClose, onSaved }) {
             <Textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={3} placeholder="Product description..." />
           </div>
 
-          {/* Material, Dimensions, Colors */}
+          {/* Material, Dimensions, Seating */}
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-medium mb-1 block">Material</label>
@@ -177,17 +188,15 @@ export default function AddProductModal({ product, onClose, onSaved }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium mb-1 block">Stock Status</label>
-              <Select value={form.stock_status} onValueChange={(v) => set("stock_status", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{STOCK.map((s) => <SelectItem key={s} value={s}>{s.replace(/-/g, " ")}</SelectItem>)}</SelectContent>
-              </Select>
+              <NativeSelect value={form.stock_status} onChange={(v) => set("stock_status", v)}>
+                {STOCK.map((s) => <option key={s} value={s}>{s.replace(/-/g, " ")}</option>)}
+              </NativeSelect>
             </div>
             <div>
               <label className="text-sm font-medium mb-1 block">Label</label>
-              <Select value={form.label || "none"} onValueChange={(v) => set("label", v === "none" ? "" : v)}>
-                <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
-                <SelectContent>{LABELS.map((l) => <SelectItem key={l.v} value={l.v}>{l.l}</SelectItem>)}</SelectContent>
-              </Select>
+              <NativeSelect value={form.label} onChange={(v) => set("label", v)}>
+                {LABELS.map((l) => <option key={l.v} value={l.v}>{l.l}</option>)}
+              </NativeSelect>
             </div>
           </div>
 

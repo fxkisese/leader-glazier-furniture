@@ -3,11 +3,22 @@ import { X, Upload, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
 import { uploadImage } from "@/api/imageUpload";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+
+function NativeSelect({ value, onChange, children, className = "" }) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`flex h-9 w-full items-center rounded-md border border-input bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring capitalize ${className}`}
+    >
+      {children}
+    </select>
+  );
+}
 
 export default function AddGalleryModal({ project, onClose, onSaved }) {
   const isEdit = !!project;
@@ -61,12 +72,9 @@ export default function AddGalleryModal({ project, onClose, onSaved }) {
           <div><label className="text-sm font-medium mb-1 block">Title *</label><Input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Project title" /></div>
           <div>
             <label className="text-sm font-medium mb-1 block">Category</label>
-            <Select value={form.category} onValueChange={(v) => set("category", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {["furniture","glass","custom","interior"].map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <NativeSelect value={form.category} onChange={(v) => set("category", v)}>
+              {["furniture","glass","custom","interior"].map((c) => <option key={c} value={c}>{c}</option>)}
+            </NativeSelect>
           </div>
           <div><label className="text-sm font-medium mb-1 block">Description</label><Textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={2} /></div>
           <div>

@@ -3,13 +3,24 @@ import { X, Upload, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
 import { uploadImage } from "@/api/imageUpload";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const GLASS_CATS = ["clear","tinted","frosted","toughened","laminated","mirror","one-way","shower","table-top","office-partition","window","decorative"];
+
+function NativeSelect({ value, onChange, children, className = "" }) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`flex h-9 w-full items-center rounded-md border border-input bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring capitalize ${className}`}
+    >
+      {children}
+    </select>
+  );
+}
 
 export default function AddGlassModal({ glass, onClose, onSaved }) {
   const isEdit = !!glass;
@@ -102,10 +113,9 @@ export default function AddGlassModal({ glass, onClose, onSaved }) {
             </div>
             <div>
               <label className="text-sm font-medium mb-1 block">Category *</label>
-              <Select value={form.category} onValueChange={(v) => set("category", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{GLASS_CATS.map((c) => <SelectItem key={c} value={c}>{c.replace(/-/g, " ")}</SelectItem>)}</SelectContent>
-              </Select>
+              <NativeSelect value={form.category} onChange={(v) => set("category", v)}>
+                {GLASS_CATS.map((c) => <option key={c} value={c}>{c.replace(/-/g, " ")}</option>)}
+              </NativeSelect>
             </div>
           </div>
 
