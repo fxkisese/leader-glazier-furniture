@@ -132,7 +132,7 @@ export default function ProductQuickView({ product, onClose }) {
             {product.delivery_note && (
               <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex gap-3">
                 <span className="text-xl">📦</span>
-                <p className="text-sm text-primary-foreground font-medium">{product.delivery_note}</p>
+                <p className="text-sm text-primary font-medium">{product.delivery_note}</p>
               </div>
             )}
           </div>
