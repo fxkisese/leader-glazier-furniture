@@ -7,6 +7,7 @@ const WHATSAPP = "254700000000";
 
 export default function ProductQuickView({ product, onClose }) {
   const [imgIndex, setImgIndex] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const images = product.images || [];
 
   const waMessage = product.whatsapp_message
@@ -19,9 +20,14 @@ export default function ProductQuickView({ product, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Images Section (Half Screen Height Mobile, Half Screen Width Desktop) */}
-        <div className="relative w-full md:w-1/2 h-[50vh] md:h-full bg-muted flex-shrink-0">
+        <div className="relative w-full md:w-1/2 h-[50vh] md:h-full bg-muted/30 flex-shrink-0 flex items-center justify-center p-4">
           {images[imgIndex] ? (
-            <img src={images[imgIndex]} alt={product.name} className="w-full h-full object-cover" />
+            <img 
+              src={images[imgIndex]} 
+              alt={product.name} 
+              className="w-full h-full object-contain cursor-zoom-in drop-shadow-sm transition-transform hover:scale-[1.02] duration-300" 
+              onClick={() => setIsFullscreen(true)}
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-6xl">🛋️</div>
           )}
@@ -145,6 +151,44 @@ export default function ProductQuickView({ product, onClose }) {
           </div>
         </div>
       </div>
+
+      {/* Fullscreen Zoom Overlay */}
+      {isFullscreen && (
+        <div 
+          className="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center cursor-zoom-out animate-in fade-in duration-200"
+          onClick={() => setIsFullscreen(false)}
+        >
+          <button 
+            className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+            onClick={(e) => { e.stopPropagation(); setIsFullscreen(false); }}
+          >
+            <X className="w-6 h-6" />
+          </button>
+          
+          <img 
+            src={images[imgIndex]} 
+            alt={product.name} 
+            className="max-w-[95vw] max-h-[95vh] object-contain select-none" 
+          />
+
+          {images.length > 1 && (
+            <>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setImgIndex((i) => (i - 1 + images.length) % images.length); }}
+                className="absolute left-6 top-1/2 -translate-y-1/2 p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+              >
+                <ChevronLeft className="w-8 h-8" />
+              </button>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setImgIndex((i) => (i + 1) % images.length); }}
+                className="absolute right-6 top-1/2 -translate-y-1/2 p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+              >
+                <ChevronRight className="w-8 h-8" />
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
