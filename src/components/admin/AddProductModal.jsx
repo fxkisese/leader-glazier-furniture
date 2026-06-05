@@ -5,14 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/api/supabaseClient";
 import { uploadImage } from "@/api/imageUpload";
-import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const CATEGORIES = ["sofas","tv-stands","shoe-racks","wardrobes","beds","coffee-tables","dining-sets","office-desks","office-chairs","cabinets","chest-of-drawers","custom-furniture"];
 const LABELS = [{ v: "", l: "None" }, { v: "new-arrival", l: "New Arrival" }, { v: "best-seller", l: "Best Seller" }, { v: "limited-offer", l: "Limited Offer" }, { v: "custom-order", l: "Custom Order" }];
 const STOCK = ["in-stock", "out-of-stock", "made-to-order"];
 
-// Native select styled to match the design
 function NativeSelect({ value, onChange, children, className = "" }) {
   return (
     <select
@@ -46,6 +44,7 @@ export default function AddProductModal({ product, onClose, onSaved }) {
     images: product?.images || [],
   });
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -73,33 +72,75 @@ export default function AddProductModal({ product, onClose, onSaved }) {
 
   const removeImage = (i) => set("images", form.images.filter((_, idx) => idx !== i));
 
-  const saveMutation = useMutation({
-    mutationFn: async () => {
-      const data = {
-        ...form,
-        price: parseFloat(form.price),
-        discount_price: form.discount_price ? parseFloat(form.discount_price) : null,
-      };
-      if (isEdit) {
-        const { error } = await supabase.from('products').update(data).eq('id', product.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from('products').insert(data);
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => { toast.success(isEdit ? "Product updated!" : "Product added!"); onSaved(); },
-    onError: (err) => toast.error("Something went wrong: " + (err.message || "Please try again.")),
-  });
+  const handleSave = async () => {
+    if (!form.name || !form.price) {
+      toast.error("Please fill in Product Name and Price");
+      return;
+    }
 
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
+    setSaving(true);
+    try {
+      // Clean data - convert empty strings to null for optional fields
+      const data = {
+        name: form.name.trim(),
+        category: form.category || "sofas",
+        price: parseFloat(form.price) || 0,
+        discount_price: form.discount_price ? parseFloat(form.discount_price) : null,
+        description: form.description || null,
+        material: form.material || null,
+        dimensions: form.dimensions || null,
+        colors: form.colors || null,
+        seating_capacity: form.seating_capacity || null,
+        stock_status: form.stock_status || "in-stock",
+        label: form.label || null,
+        is_featured: form.is_featured || false,
+        is_published: form.is_published !== false,
+        delivery_note: form.delivery_note || null,
+        whatsapp_message: form.whatsapp_message || null,
+        images: form.images || [],
+      };
+
+      console.log('[Save Product] Saving data:', JSON.stringify(data, null, 2));
+
+      let result;
+      if (isEdit) {
+        result = await supabase.from('products').update(data).eq('id', product.id).select();
+      } else {
+        result = await supabase.from('products').insert(data).select();
+      }
+
+      console.log('[Save Product] Result:', JSON.stringify(result, null, 2));
+
+      if (result.error) {
+        console.error('[Save Product] Supabase error:', result.error);
+        const errMsg = result.error.message || result.error.details || JSON.stringify(result.error);
+        toast.error("Save failed: " + errMsg);
+        alert("Save failed!\n\nError: " + errMsg + "\n\nCode: " + (result.error.code || "unknown") + "\nDetails: " + (result.error.details || "none") + "\nHint: " + (result.error.hint || "none"));
+        return;
+      }
+
+      toast.success(isEdit ? "Product updated!" : "Product added!");
+      onSaved();
+    } catch (err) {
+      console.error('[Save Product] Catch error:', err);
+      toast.error("Error: " + (err.message || "Unknown error"));
+      alert("Save error:\n" + (err.message || JSON.stringify(err)));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Delete this product?")) return;
+    try {
       const { error } = await supabase.from('products').delete().eq('id', product.id);
       if (error) throw error;
-    },
-    onSuccess: () => { toast.success("Product deleted."); onSaved(); },
-    onError: (err) => toast.error("Delete failed: " + (err.message || "Please try again.")),
-  });
+      toast.success("Product deleted.");
+      onSaved();
+    } catch (err) {
+      toast.error("Delete failed: " + (err.message || "Unknown error"));
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -223,14 +264,18 @@ export default function AddProductModal({ product, onClose, onSaved }) {
         <div className="p-6 border-t border-border flex gap-3 justify-between">
           {isEdit && (
             <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-white"
-              onClick={() => { if (confirm("Delete this product?")) deleteMutation.mutate(); }}>
+              onClick={handleDelete}>
               Delete
             </Button>
           )}
           <div className="flex gap-3 ml-auto">
             <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending || !form.name || !form.price} className="bg-primary hover:bg-primary/90 text-white px-8">
-              {saveMutation.isPending ? "Saving..." : isEdit ? "Update Product" : "Add Product"}
+            <Button
+              onClick={handleSave}
+              disabled={saving || !form.name || !form.price}
+              className="bg-primary hover:bg-primary/90 text-white px-8"
+            >
+              {saving ? "Saving..." : isEdit ? "Update Product" : "Add Product"}
             </Button>
           </div>
         </div>
