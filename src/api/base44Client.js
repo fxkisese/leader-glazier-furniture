@@ -98,9 +98,10 @@ export const base44 = {
           path: path
         });
         
-        const { error } = await supabase.storage.from('media').upload(path, file, {
+        const { error } = await supabase.storage.from('craftsman-images').upload(path, file, {
           cacheControl: '3600',
-          upsert: false,
+          upsert: true,
+          contentType: file.type,
         });
         
         if (error) {
@@ -108,7 +109,7 @@ export const base44 = {
           throw new Error(`Upload failed: ${error.message}`);
         }
         
-        const { data } = supabase.storage.from('media').getPublicUrl(path);
+        const { data } = supabase.storage.from('craftsman-images').getPublicUrl(path);
         console.log('[Supabase Upload] Success:', data.publicUrl);
         
         return { file_url: data.publicUrl };

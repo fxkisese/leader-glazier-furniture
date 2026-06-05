@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
+import { uploadImage } from "@/api/imageUpload";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -35,13 +36,12 @@ export default function AddGlassModal({ glass, onClose, onSaved }) {
     
     try {
       setUploading(true);
-      console.log('[Upload] Starting upload for:', file.name);
-      const result = await base44.integrations.Core.UploadFile({ file });
-      console.log('[Upload] Success:', result.file_url);
-      set("image", result.file_url);
+      toast.info(`Uploading ${file.name}...`);
+      const url = await uploadImage(file, 'glass');
+      set("image", url);
       toast.success("Image uploaded!");
     } catch (error) {
-      console.error('[Upload] Error:', error);
+      console.error('[Glass Upload] Error:', error);
       toast.error("Upload failed: " + (error.message || "Unknown error"));
     } finally {
       setUploading(false);

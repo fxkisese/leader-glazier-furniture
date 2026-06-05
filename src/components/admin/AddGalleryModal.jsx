@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
+import { uploadImage } from "@/api/imageUpload";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -22,13 +23,13 @@ export default function AddGalleryModal({ project, onClose, onSaved }) {
 
   const handleUpload = async (e) => {
     const files = Array.from(e.target.files);
+    if (!files.length) return;
     setUploading(true);
     try {
       for (const file of files) {
-        console.log('[Gallery Upload] Starting upload for:', file.name);
-        const result = await base44.integrations.Core.UploadFile({ file });
-        console.log('[Gallery Upload] Success:', result.file_url);
-        setForm((f) => ({ ...f, images: [...f.images, result.file_url] }));
+        toast.info(`Uploading ${file.name}...`);
+        const url = await uploadImage(file, 'gallery');
+        setForm((f) => ({ ...f, images: [...f.images, url] }));
       }
       toast.success(`Uploaded ${files.length} image(s)!`);
     } catch (error) {

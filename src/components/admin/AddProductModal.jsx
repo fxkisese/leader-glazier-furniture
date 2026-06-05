@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/api/supabaseClient";
+import { uploadImage } from "@/api/imageUpload";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -43,23 +44,9 @@ export default function AddProductModal({ product, onClose, onSaved }) {
     try {
       const uploadedUrls = [];
       for (const file of files) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
-        const filePath = `products/${fileName}`;
-
-        console.log('[Product Upload] Starting upload:', file.name);
-        const { error: uploadError } = await supabase.storage
-          .from('craftsman-images')
-          .upload(filePath, file);
-
-        if (uploadError) throw uploadError;
-
-        const { data } = supabase.storage
-          .from('craftsman-images')
-          .getPublicUrl(filePath);
-
-        console.log('[Product Upload] Success:', data.publicUrl);
-        uploadedUrls.push(data.publicUrl);
+        toast.info(`Uploading ${file.name}...`);
+        const url = await uploadImage(file, 'products');
+        uploadedUrls.push(url);
       }
       setForm((f) => ({ ...f, images: [...f.images, ...uploadedUrls] }));
       toast.success(`Uploaded ${files.length} image(s)!`);
@@ -68,7 +55,6 @@ export default function AddProductModal({ product, onClose, onSaved }) {
       toast.error("Upload failed: " + (error.message || "Unknown error"));
     } finally {
       setUploading(false);
-      // Reset input so same file can be re-uploaded if needed
       e.target.value = "";
     }
   };

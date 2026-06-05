@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Upload, Send, MessageCircle, CheckCircle2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { uploadImage } from "@/api/imageUpload";
 import { toast } from "sonner";
 
 const WHATSAPP = "254700000000";
@@ -27,10 +28,9 @@ export default function CustomOrders() {
     
     try {
       setUploading(true);
-      console.log('[CustomOrder Upload] Starting upload:', file.name);
-      const result = await base44.integrations.Core.UploadFile({ file });
-      console.log('[CustomOrder Upload] Success:', result.file_url);
-      setImage(result.file_url);
+      toast.info(`Uploading ${file.name}...`);
+      const url = await uploadImage(file, 'custom-orders');
+      setImage(url);
       toast.success("Image uploaded!");
     } catch (error) {
       console.error('[CustomOrder Upload] Error:', error);
