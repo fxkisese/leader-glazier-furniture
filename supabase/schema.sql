@@ -17,6 +17,7 @@ create table if not exists products (
   stock_status text default 'in-stock',
   label text,
   is_featured boolean default false,
+  homepage_order integer default 0,
   is_published boolean default true,
   delivery_note text,
   whatsapp_message text,

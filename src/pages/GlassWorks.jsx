@@ -7,7 +7,7 @@ import { Plus, Calculator, MessageCircle, CheckCircle2 } from "lucide-react";
 import AddGlassModal from "../components/admin/AddGlassModal";
 import { useAuth } from "@/lib/AuthContext";
 
-const WHATSAPP = "254722914819";
+const WHATSAPP = "25411767199";
 
 const SAMPLE_GLASS = [
   { id: "1", name: "Mirror Glass", category: "mirror", price_per_sqft: 700, thickness: "4mm, 6mm", description: "Full-length mirrors, bathroom mirrors, decorative wall mirrors.", image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop", is_available: true },

@@ -68,8 +68,8 @@ export default function ShowroomSection() {
               </div>
               <div>
                 <p className="text-white/40 text-xs uppercase tracking-widest mb-0.5">Call or WhatsApp</p>
-                <a href="tel:+254722914819" className="text-white font-semibold text-lg hover:text-gold transition-colors">
-                  0722 914 819
+                <a href="tel:+25411767199" className="text-white font-semibold text-lg hover:text-gold transition-colors">
+                  011 767 199
                 </a>
               </div>
             </div>

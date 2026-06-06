@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Phone, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const WHATSAPP = "254722914819";
+const WHATSAPP = "25411767199";
 
 const navLinks = [
   { label: "Home", path: "/" },

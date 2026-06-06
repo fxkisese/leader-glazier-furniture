@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Phone, MessageCircle, MapPin, Mail, Send, CheckCircle2 } from "lucide-react";
 
-const WHATSAPP = "254722914819";
+const WHATSAPP = "25411767199";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", message: "" });
@@ -36,8 +36,8 @@ export default function Contact() {
               <h2 className="font-playfair text-2xl font-bold text-foreground mb-6">How to Reach Us</h2>
               <div className="space-y-5">
                 {[
-                  { icon: MessageCircle, title: "WhatsApp (Fastest)", value: "+254 722 914 819", href: `https://wa.me/${WHATSAPP}`, color: "text-green-600", bg: "bg-green-50" },
-                  { icon: Phone, title: "Phone Call", value: "+254 722 914 819", href: `tel:+${WHATSAPP}`, color: "text-primary", bg: "bg-primary/5" },
+                  { icon: MessageCircle, title: "WhatsApp (Fastest)", value: "+254 11 767 199", href: `https://wa.me/${WHATSAPP}`, color: "text-green-600", bg: "bg-green-50" },
+                  { icon: Phone, title: "Phone Call", value: "+254 11 767 199", href: `tel:+${WHATSAPP}`, color: "text-primary", bg: "bg-primary/5" },
                   { icon: Mail, title: "Email", value: "info@leaderglazierfurniture.co.ke", href: "mailto:info@leaderglazierfurniture.co.ke", color: "text-primary", bg: "bg-primary/5" },
                   { icon: MapPin, title: "Location", value: "Nairobi & Machakos, Kenya — Countrywide Delivery", href: null, color: "text-primary", bg: "bg-primary/5" },
                 ].map(({ icon: Icon, title, value, href, color, bg }) => (

@@ -1,10 +1,19 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, ChevronRight, Calculator } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 
-const WHATSAPP = "254722914819";
+const WHATSAPP = "25411767199";
 
 export default function HeroSection() {
+  const { data: featuredProducts = [] } = useQuery({
+    queryKey: ["hero-products"],
+    queryFn: () => base44.entities.Product.filter({ is_featured: true, is_published: true }, "homepage_order", 4),
+  });
+
+  const heroImages = featuredProducts.map(p => p.images?.[0]).filter(Boolean);
+
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-[#f8f5ff] via-white to-[#f0ebff]">
       {/* Background decorative elements */}
@@ -63,40 +72,57 @@ export default function HeroSection() {
 
           {/* Image grid */}
           <div className="relative hidden lg:block">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <div className="rounded-2xl overflow-hidden aspect-[4/5] shadow-xl shadow-primary/10">
-                  <img
-                    src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=500&fit=crop"
-                    alt="Handcrafted Luxury Sofa"
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                  />
+            {heroImages.length > 0 ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div className="rounded-2xl overflow-hidden aspect-[4/5] shadow-xl shadow-primary/10 bg-muted/20">
+                    <img
+                      src={heroImages[0]}
+                      alt="Featured Handcrafted Furniture"
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                    />
+                  </div>
+                  {heroImages[1] && (
+                    <div className="rounded-2xl overflow-hidden aspect-square shadow-lg shadow-primary/10 bg-muted/20">
+                      <img
+                        src={heroImages[1]}
+                        alt="Kenyan Artisan Furniture"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                      />
+                    </div>
+                  )}
                 </div>
-                <div className="rounded-2xl overflow-hidden aspect-square shadow-lg shadow-primary/10">
-                  <img
-                    src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=300&h=300&fit=crop"
-                    alt="Kenyan Artisan Workshop"
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                  />
+                <div className="space-y-4 pt-8">
+                  {heroImages[2] && (
+                    <div className="rounded-2xl overflow-hidden aspect-square shadow-lg shadow-primary/10 bg-muted/20">
+                      <img
+                        src={heroImages[2]}
+                        alt="Bespoke Furniture Piece"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                      />
+                    </div>
+                  )}
+                  {heroImages[3] && (
+                    <div className="rounded-2xl overflow-hidden aspect-[4/5] shadow-xl shadow-primary/10 bg-muted/20">
+                      <img
+                        src={heroImages[3]}
+                        alt="Custom Made Furniture"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="space-y-4 pt-8">
-                <div className="rounded-2xl overflow-hidden aspect-square shadow-lg shadow-primary/10">
-                  <img
-                    src="https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?w=300&h=300&fit=crop"
-                    alt="Bespoke Solid Wood Dining Table"
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                  />
-                </div>
-                <div className="rounded-2xl overflow-hidden aspect-[4/5] shadow-xl shadow-primary/10">
-                  <img
-                    src="https://images.unsplash.com/photo-1611048267451-e6ed903d4a38?w=400&h=500&fit=crop"
-                    alt="Custom Hardwood Wardrobe"
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                  />
+            ) : (
+              <div className="w-full h-[600px] rounded-3xl bg-primary/5 border border-primary/10 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                    <span className="text-2xl">🛋️</span>
+                  </div>
+                  <p className="text-muted-foreground text-sm">Add featured products to display images here</p>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Floating card */}
             <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-xl shadow-primary/15 p-4 flex items-center gap-3 border border-border">

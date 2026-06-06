@@ -12,7 +12,7 @@ const LABEL_CONFIG = {
   "custom-order": { label: "Custom Order", class: "bg-purple-100 text-purple-700" },
 };
 
-const WHATSAPP = "254722914819";
+const WHATSAPP = "25411767199";
 
 export default function ProductCard({ product }) {
   const [showQuickView, setShowQuickView] = useState(false);

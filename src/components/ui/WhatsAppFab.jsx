@@ -1,6 +1,6 @@
 import { MessageCircle } from "lucide-react";
 
-const WHATSAPP = "254722914819";
+const WHATSAPP = "25411767199";
 
 export default function WhatsAppFab() {
   return (

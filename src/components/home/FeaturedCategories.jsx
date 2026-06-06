@@ -2,62 +2,64 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useRef } from "react";
 import { useInView } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 
-const CATEGORIES = [
+const CATEGORIES_TEMPLATE = [
   {
     label: "Sofas",
     sub: "L-Shaped · 3-Seater · Custom",
     path: "/catalogue?category=sofas",
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=600&fit=crop&q=80",
-    span: "large", // hero card
+    categoryId: "sofas",
+    span: "large",
   },
   {
     label: "Wardrobes",
     sub: "Built-in · Sliding · Mirrored",
     path: "/catalogue?category=wardrobes",
-    image: "https://images.unsplash.com/photo-1558997519-83ea9252edc8?w=600&h=400&fit=crop&q=80",
+    categoryId: "wardrobes",
     span: "small",
   },
   {
     label: "TV Stands",
     sub: "Modern · Floating · Storage",
     path: "/catalogue?category=tv-stands",
-    image: "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=600&h=400&fit=crop&q=80",
+    categoryId: "tv-stands",
     span: "small",
   },
   {
     label: "Beds",
     sub: "King · Queen · Upholstered",
     path: "/catalogue?category=beds",
-    image: "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=600&h=500&fit=crop&q=80",
+    categoryId: "beds",
     span: "medium",
   },
   {
     label: "Glass & Mirrors",
     sub: "Bathroom · Office · Décor",
     path: "/glass",
-    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=500&fit=crop&q=80",
+    categoryId: "glass",
     span: "medium",
   },
   {
     label: "Dining Sets",
     sub: "4–8 Seater · Modern · Classic",
     path: "/catalogue?category=dining-sets",
-    image: "https://images.unsplash.com/photo-1567016376408-0226e4d0c1ea?w=600&h=400&fit=crop&q=80",
+    categoryId: "dining-sets",
     span: "small",
   },
   {
     label: "Office Furniture",
     sub: "Desks · Chairs · Partitions",
     path: "/catalogue?category=office-desks",
-    image: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=600&h=400&fit=crop&q=80",
+    categoryId: "office-desks",
     span: "small",
   },
   {
     label: "Custom Orders",
     sub: "Your Vision, Crafted to Order",
     path: "/custom-orders",
-    image: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=800&h=500&fit=crop&q=80",
+    categoryId: "custom",
     span: "wide",
     accent: true,
   },
@@ -76,13 +78,19 @@ function CategoryCard({ cat, index }) {
     >
       <Link to={cat.path} className="group block relative overflow-hidden rounded-2xl">
         {/* Image */}
-        <div className="overflow-hidden w-full h-full">
-          <img
-            src={cat.image}
-            alt={cat.label}
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-            loading="lazy"
-          />
+        <div className="overflow-hidden w-full h-full bg-muted/20">
+          {cat.image ? (
+            <img
+              src={cat.image}
+              alt={cat.label}
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-primary/5">
+              <span className="text-4xl opacity-30">🛋️</span>
+            </div>
+          )}
         </div>
 
         {/* Gradient overlay — always present, deepens on hover */}
@@ -115,8 +123,30 @@ export default function FeaturedCategories() {
   const headerRef = useRef(null);
   const headerInView = useInView(headerRef, { once: true });
 
+  const { data: products = [] } = useQuery({
+    queryKey: ["category-products"],
+    queryFn: () => base44.entities.Product.list("-created_date", 100),
+  });
+
+  const { data: glassTypes = [] } = useQuery({
+    queryKey: ["category-glass"],
+    queryFn: () => base44.entities.GlassType.list("-created_date", 20),
+  });
+
+  const categories = CATEGORIES_TEMPLATE.map((cat) => {
+    let img = null;
+    if (cat.categoryId === "glass") {
+      img = glassTypes.find(g => g.image)?.image || null;
+    } else if (cat.categoryId === "custom") {
+      img = null; // We can leave custom without image and let accent take over
+    } else {
+      img = products.find(p => p.category === cat.categoryId && p.images?.[0])?.images?.[0] || null;
+    }
+    return { ...cat, image: img };
+  });
+
   // Split into layout groups
-  const [hero, ...rest] = CATEGORIES;
+  const [hero, ...rest] = categories;
   const stack = rest.slice(0, 2);   // Wardrobes, TV Stands → right column
   const row2 = rest.slice(2, 4);   // Beds, Mirrors → medium cards
   const row3 = rest.slice(4, 6);   // Dining, Office → small

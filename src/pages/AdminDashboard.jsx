@@ -13,6 +13,7 @@ import AdminQuotesTab from "../components/admin/AdminQuotesTab";
 import AdminCustomOrdersTab from "../components/admin/AdminCustomOrdersTab";
 import AdminBatchTab from "../components/admin/AdminBatchTab";
 import AdminOrdersTab from "../components/admin/AdminOrdersTab";
+import AdminHomepageTab from "../components/admin/AdminHomepageTab";
 
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "admin2020";
 
@@ -61,6 +62,7 @@ function PasswordGate({ onUnlock }) {
 
 const TABS = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "homepage", label: "Homepage", icon: Sparkles },
   { id: "products", label: "Furniture", icon: Package },
   { id: "payment-orders", label: "Orders", icon: ShoppingBag },
   { id: "batch", label: "Bulk Upload", icon: Upload },
@@ -111,6 +113,7 @@ export default function AdminDashboard() {
         </div>
 
         {tab === "overview" && <AdminOverview />}
+        {tab === "homepage" && <AdminHomepageTab />}
         {tab === "products" && <AdminProductsTab />}
         {tab === "payment-orders" && <AdminOrdersTab />}
         {tab === "batch" && <AdminBatchTab />}
