@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
-const WHATSAPP = "254700000000";
+const WHATSAPP = "254722914819";
 
 const STATUS_COLORS = {
   new: "bg-amber-50 text-amber-700",

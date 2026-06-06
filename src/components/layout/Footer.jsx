@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Phone, MessageCircle, MapPin, Mail } from "lucide-react";
 
-const WHATSAPP = "254700000000";
+const WHATSAPP = "254722914819";
 
 export default function Footer() {
   return (
@@ -15,7 +15,7 @@ export default function Footer() {
               <p className="text-gold text-sm font-medium tracking-widest uppercase">& Furniture</p>
             </div>
             <p className="text-primary-foreground/70 text-sm leading-relaxed">
-              Premium furniture, sofas, wardrobes, TV stands, and professional glass solutions in Nairobi. Quality you can see.
+              Bespoke handcrafted furniture and professional glass solutions, proudly built by local Kenyan artisans and delivered countrywide.
             </p>
             <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors">
@@ -54,15 +54,15 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-primary-foreground/70">
               <li className="flex items-start gap-2">
                 <Phone className="w-4 h-4 mt-0.5 shrink-0 text-gold" />
-                <span>+254 700 000 000</span>
+                <span>+254 722 914 819</span>
               </li>
               <li className="flex items-start gap-2">
                 <MessageCircle className="w-4 h-4 mt-0.5 shrink-0 text-gold" />
-                <span>WhatsApp: +254 700 000 000</span>
+                <span>WhatsApp: +254 722 914 819</span>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-gold" />
-                <span>Nairobi, Kenya</span>
+                <span>Nairobi & Machakos, Kenya (Countrywide Delivery)</span>
               </li>
               <li className="flex items-start gap-2">
                 <Mail className="w-4 h-4 mt-0.5 shrink-0 text-gold" />

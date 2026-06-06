@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import CheckoutModal from "@/components/checkout/CheckoutModal";
 
-const WHATSAPP = "254700000000";
+const WHATSAPP = "254722914819";
 
 export default function ProductQuickView({ product, onClose }) {
   const [imgIndex, setImgIndex] = useState(0);

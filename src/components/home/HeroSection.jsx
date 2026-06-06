@@ -20,16 +20,13 @@ export default function HeroSection() {
           <div className="space-y-8 animate-fade-up">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium">
               <span className="w-2 h-2 bg-gold rounded-full" />
-              Nairobi's Premium Furniture & Glass Specialists
+              Kenyan Artisan Craftsmanship & Custom Glass
             </div>
             <h1 className="font-playfair text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
-              Premium Furniture,{" "}
-              <span className="text-primary">Sofas</span> &{" "}
-              <span className="text-gold">Glass Solutions</span> for Modern Spaces
+              Authentic <span className="text-primary">Handcrafted</span> Furniture & <span className="text-gold">Glass Solutions</span> for Kenyan Homes
             </h1>
             <p className="text-muted-foreground text-lg leading-relaxed max-w-lg">
-              Shop quality sofas, wardrobes, TV stands, office furniture, and custom pieces. 
-              Calculate glass prices instantly and request quotes online.
+              Locally sourced and custom handcrafted furniture built by master Kenyan artisans. Get bespoke sofas, wardrobes, dining sets, and instant custom glass quotes with delivery countrywide.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link to="/catalogue">
@@ -52,9 +49,9 @@ export default function HeroSection() {
             {/* Trust indicators */}
             <div className="flex flex-wrap gap-6 pt-2">
               {[
-                { label: "Premium Products", icon: "✦" },
-                { label: "Custom Orders", icon: "✦" },
-                { label: "Glass Experts", icon: "✦" },
+                { label: "Handcrafted in Kenya", icon: "✦" },
+                { label: "Bespoke Custom Orders", icon: "✦" },
+                { label: "Countrywide Delivery", icon: "✦" },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-2 text-sm text-muted-foreground">
                   <span className="text-gold text-xs">{item.icon}</span>
@@ -71,14 +68,14 @@ export default function HeroSection() {
                 <div className="rounded-2xl overflow-hidden aspect-[4/5] shadow-xl shadow-primary/10">
                   <img
                     src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=500&fit=crop"
-                    alt="Premium Sofa"
+                    alt="Handcrafted Luxury Sofa"
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                   />
                 </div>
                 <div className="rounded-2xl overflow-hidden aspect-square shadow-lg shadow-primary/10">
                   <img
-                    src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=300&h=300&fit=crop"
-                    alt="Interior"
+                    src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=300&h=300&fit=crop"
+                    alt="Kenyan Artisan Workshop"
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                   />
                 </div>
@@ -86,15 +83,15 @@ export default function HeroSection() {
               <div className="space-y-4 pt-8">
                 <div className="rounded-2xl overflow-hidden aspect-square shadow-lg shadow-primary/10">
                   <img
-                    src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=300&h=300&fit=crop"
-                    alt="Glass Mirror"
+                    src="https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?w=300&h=300&fit=crop"
+                    alt="Bespoke Solid Wood Dining Table"
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                   />
                 </div>
                 <div className="rounded-2xl overflow-hidden aspect-[4/5] shadow-xl shadow-primary/10">
                   <img
-                    src="https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=400&h=500&fit=crop"
-                    alt="Wardrobe"
+                    src="https://images.unsplash.com/photo-1611048267451-e6ed903d4a38?w=400&h=500&fit=crop"
+                    alt="Custom Hardwood Wardrobe"
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                   />
                 </div>

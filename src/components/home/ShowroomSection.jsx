@@ -33,9 +33,9 @@ export default function ShowroomSection() {
           className="mb-12 lg:mb-16"
         >
           <p className="text-gold text-xs font-medium uppercase tracking-[0.2em] mb-3">Find Us</p>
-          <h2 className="font-playfair text-3xl lg:text-4xl font-bold text-white mb-4">Visit Our Showroom</h2>
+          <h2 className="font-playfair text-3xl lg:text-4xl font-bold text-white mb-4">Visit Our Showrooms</h2>
           <p className="text-white/50 max-w-xl leading-relaxed text-sm">
-            Crafted furniture, mirrors, wardrobes, office setups, and custom interior solutions — designed for modern homes and workspaces. Come see it in person.
+            Explore our handcrafted furniture collections, custom mirrors, and bespoke design samples. Visit our showrooms in Nairobi and Machakos, or place your custom order online for delivery countrywide.
           </p>
         </motion.div>
 

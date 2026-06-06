@@ -43,7 +43,7 @@ export default function Gallery() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
           <p className="text-gold text-sm font-medium uppercase tracking-widest mb-2">Our Work</p>
           <h1 className="font-playfair text-3xl lg:text-4xl font-bold text-foreground">Completed Projects</h1>
-          <p className="text-muted-foreground mt-2 max-w-lg">A showcase of furniture installations, glass works, and custom projects across Nairobi.</p>
+          <p className="text-muted-foreground mt-2 max-w-lg">A showcase of bespoke furniture installations, custom woodwork, and professional glass projects handcrafted for our clients across Kenya.</p>
         </div>
       </div>
 

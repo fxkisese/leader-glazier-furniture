@@ -9,7 +9,7 @@ import { base44 } from "@/api/base44Client";
 import { uploadImage } from "@/api/imageUpload";
 import { toast } from "sonner";
 
-const WHATSAPP = "254700000000";
+const WHATSAPP = "254722914819";
 
 const PRODUCT_TYPES = ["Custom Sofa", "Wardrobe", "TV Stand", "Bed Frame", "Office Desk", "Dining Table", "Glass Partition", "Mirror", "Shower Glass", "Cabinet", "Shoe Rack", "Other Custom Item"];
 const MATERIALS = ["Wood", "Metal", "Glass", "Fabric", "Leather", "Velvet", "Mixed Materials", "Not Sure Yet"];
@@ -75,7 +75,7 @@ export default function CustomOrders() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 lg:py-14">
           <p className="text-gold text-sm font-medium uppercase tracking-widest mb-2">Bespoke Creations</p>
           <h1 className="font-playfair text-3xl lg:text-4xl font-bold text-foreground">Custom Order Request</h1>
-          <p className="text-muted-foreground mt-2 max-w-lg">Have a specific design in mind? Tell us what you need and we'll build it for you. Sofas, wardrobes, glass works — any custom piece.</p>
+          <p className="text-muted-foreground mt-2 max-w-lg">Have a specific design in mind? Share your vision and our master Kenyan woodcarvers and artisans will bring it to life. Sofas, beds, dining sets, wardrobes, or custom glass works — built to order and delivered nationwide.</p>
         </div>
       </div>
 
@@ -126,7 +126,7 @@ export default function CustomOrders() {
             </div>
             <div>
               <label className="text-sm font-medium mb-1 block">Your Location</label>
-              <Input value={form.location} onChange={(e) => set("location", e.target.value)} placeholder="Area, Nairobi" />
+              <Input value={form.location} onChange={(e) => set("location", e.target.value)} placeholder="City or Town (e.g. Nairobi, Mombasa, Nakuru, Kisumu)" />
             </div>
           </div>
 

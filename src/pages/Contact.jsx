@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Phone, MessageCircle, MapPin, Mail, Send, CheckCircle2 } from "lucide-react";
 
-const WHATSAPP = "254700000000";
+const WHATSAPP = "254722914819";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", message: "" });
@@ -36,10 +36,10 @@ export default function Contact() {
               <h2 className="font-playfair text-2xl font-bold text-foreground mb-6">How to Reach Us</h2>
               <div className="space-y-5">
                 {[
-                  { icon: MessageCircle, title: "WhatsApp (Fastest)", value: "+254 700 000 000", href: `https://wa.me/${WHATSAPP}`, color: "text-green-600", bg: "bg-green-50" },
-                  { icon: Phone, title: "Phone Call", value: "+254 700 000 000", href: `tel:+${WHATSAPP}`, color: "text-primary", bg: "bg-primary/5" },
-                  { icon: Mail, title: "Email", value: "info@craftsmansgalore.co.ke", href: "mailto:info@craftsmansgalore.co.ke", color: "text-primary", bg: "bg-primary/5" },
-                  { icon: MapPin, title: "Location", value: "Nairobi, Kenya — Delivery across Nairobi", href: null, color: "text-primary", bg: "bg-primary/5" },
+                  { icon: MessageCircle, title: "WhatsApp (Fastest)", value: "+254 722 914 819", href: `https://wa.me/${WHATSAPP}`, color: "text-green-600", bg: "bg-green-50" },
+                  { icon: Phone, title: "Phone Call", value: "+254 722 914 819", href: `tel:+${WHATSAPP}`, color: "text-primary", bg: "bg-primary/5" },
+                  { icon: Mail, title: "Email", value: "info@leaderglazierfurniture.co.ke", href: "mailto:info@leaderglazierfurniture.co.ke", color: "text-primary", bg: "bg-primary/5" },
+                  { icon: MapPin, title: "Location", value: "Nairobi & Machakos, Kenya — Countrywide Delivery", href: null, color: "text-primary", bg: "bg-primary/5" },
                 ].map(({ icon: Icon, title, value, href, color, bg }) => (
                   <div key={title} className="flex items-start gap-4 p-4 rounded-2xl border border-border hover:border-primary/20 transition-colors">
                     <div className={`w-10 h-10 ${bg} rounded-xl flex items-center justify-center shrink-0`}>

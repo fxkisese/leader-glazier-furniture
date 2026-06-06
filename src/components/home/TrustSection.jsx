@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Truck, Shield, Wrench, Phone } from "lucide-react";
 
 const features = [
-  { icon: Shield, title: "Premium Quality", desc: "Every piece is crafted with quality materials and attention to detail." },
-  { icon: Truck, title: "Nairobi Delivery", desc: "We deliver and install furniture and glass across Nairobi and beyond." },
-  { icon: Wrench, title: "Professional Installation", desc: "Our team handles glass installation, fitting, and furniture assembly." },
-  { icon: Phone, title: "Direct Support", desc: "Reach us directly on WhatsApp or phone for quotes and inquiries." },
+  { icon: Shield, title: "Artisanal Quality", desc: "Every piece is individually handcrafted by skilled local artisans using durable, premium materials." },
+  { icon: Truck, title: "Kenya-Wide Delivery", desc: "We safely deliver and install custom furniture and glass countrywide across Kenya." },
+  { icon: Wrench, title: "Expert Installation", desc: "Our local technicians handle professional glass fitting and on-site furniture assembly." },
+  { icon: Phone, title: "Direct Support", desc: "Reach us directly on WhatsApp or phone for quotes and custom order consultation." },
 ];
 
 export default function TrustSection() {

@@ -140,7 +140,7 @@ export default function FeaturedCategories() {
               Designed for<br className="hidden sm:block" /> Every Space
             </h2>
             <p className="text-muted-foreground text-sm max-w-xs leading-relaxed">
-              Premium furniture, glass solutions, and bespoke custom pieces — all under one roof in Nairobi.
+              Bespoke furniture, glass solutions, and custom orders — proudly handcrafted in Kenya and delivered countrywide.
             </p>
           </div>
         </motion.div>

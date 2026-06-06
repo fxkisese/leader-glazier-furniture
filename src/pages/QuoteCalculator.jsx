@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calculator, MessageCircle, Phone, Save, MapPin } from "lucide-react";
 import { toast } from "sonner";
 
-const WHATSAPP = "254700000000";
+const WHATSAPP = "254722914819";
 
 const SAMPLE_GLASS = [
   { id: "mirror", name: "Mirror Glass", price_per_sqft: 700, installation_price: 2000, frame_price_per_sqft: 150 },

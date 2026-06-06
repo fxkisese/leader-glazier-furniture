@@ -7,7 +7,7 @@ import { Plus, Calculator, MessageCircle, CheckCircle2 } from "lucide-react";
 import AddGlassModal from "../components/admin/AddGlassModal";
 import { useAuth } from "@/lib/AuthContext";
 
-const WHATSAPP = "254700000000";
+const WHATSAPP = "254722914819";
 
 const SAMPLE_GLASS = [
   { id: "1", name: "Mirror Glass", category: "mirror", price_per_sqft: 700, thickness: "4mm, 6mm", description: "Full-length mirrors, bathroom mirrors, decorative wall mirrors.", image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop", is_available: true },
@@ -41,7 +41,7 @@ export default function GlassWorks() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
           <p className="text-gold text-sm font-medium uppercase tracking-widest mb-2">Glass Solutions</p>
           <h1 className="font-playfair text-3xl lg:text-4xl font-bold text-foreground">Glass & Mirror Works</h1>
-          <p className="text-muted-foreground mt-2 max-w-xl">Professional glass cutting, mirror installation, and glazier services in Nairobi. Select any glass type to get an instant quote.</p>
+          <p className="text-muted-foreground mt-2 max-w-xl">Professional glass cutting, mirror installation, and glazier services. Selected, cut to size, and delivered countrywide in Kenya. Select any glass type to get an instant quote.</p>
           <div className="flex gap-3 mt-6">
             <Link to="/quote-calculator">
               <Button className="bg-primary hover:bg-primary/90 text-white rounded-full gap-2">
