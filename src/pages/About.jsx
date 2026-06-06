@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Shield, Truck, Wrench, Award, MessageCircle } from "lucide-react";
 
-const WHATSAPP = "25411767199";
+const WHATSAPP = "254110767199";
 
 export default function About() {
     return (

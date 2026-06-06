@@ -9,7 +9,7 @@ import { base44 } from "@/api/base44Client";
 import { uploadImage } from "@/api/imageUpload";
 import { toast } from "sonner";
 
-const WHATSAPP = "25411767199";
+const WHATSAPP = "254110767199";
 
 const PRODUCT_TYPES = ["Custom Sofa", "Wardrobe", "TV Stand", "Bed Frame", "Office Desk", "Dining Table", "Glass Partition", "Mirror", "Shower Glass", "Cabinet", "Shoe Rack", "Other Custom Item"];
 const MATERIALS = ["Wood", "Metal", "Glass", "Fabric", "Leather", "Velvet", "Mixed Materials", "Not Sure Yet"];

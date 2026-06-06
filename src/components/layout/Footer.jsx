@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Phone, MessageCircle, MapPin, Mail } from "lucide-react";
 
-const WHATSAPP = "25411767199";
+const WHATSAPP = "254110767199";
 
 export default function Footer() {
   return (
@@ -54,11 +54,11 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-primary-foreground/70">
               <li className="flex items-start gap-2">
                 <Phone className="w-4 h-4 mt-0.5 shrink-0 text-gold" />
-                <span>+254 11 767 199</span>
+                <span>+254 110 767 199</span>
               </li>
               <li className="flex items-start gap-2">
                 <MessageCircle className="w-4 h-4 mt-0.5 shrink-0 text-gold" />
-                <span>WhatsApp: +254 11 767 199</span>
+                <span>WhatsApp: +254 110 767 199</span>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-gold" />

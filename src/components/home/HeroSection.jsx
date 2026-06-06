@@ -4,7 +4,7 @@ import { MessageCircle, ChevronRight, Calculator } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 
-const WHATSAPP = "25411767199";
+const WHATSAPP = "254110767199";
 
 export default function HeroSection() {
   const { data: featuredProducts = [] } = useQuery({
