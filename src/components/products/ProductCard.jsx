@@ -18,10 +18,8 @@ export default function ProductCard({ product }) {
   const [showQuickView, setShowQuickView] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  const imageLink = product.images?.[0] ? `\n\nImage: ${product.images[0]}` : "";
   const waMessage = product.whatsapp_message
-    ? `${product.whatsapp_message}${imageLink}`
-    : `Hello Craftsman Galore, I'm interested in the *${product.name}* (KSh ${product.price?.toLocaleString()}). Please share more details.${imageLink}`;
+    || (product.images?.[0] ? product.images[0] : `Hello Craftsman Galore, I'm interested in the *${product.name}* (KSh ${product.price?.toLocaleString()}). Please share more details.`);
 
   const labelConf = LABEL_CONFIG[product.label];
 
