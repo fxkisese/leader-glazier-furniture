@@ -12,8 +12,10 @@ export default function ProductQuickView({ product, onClose }) {
   const [showCheckout, setShowCheckout] = useState(false);
   const images = product.images || [];
 
+  const imageLink = product.images?.[0] ? `\n\nImage: ${product.images[0]}` : "";
   const waMessage = product.whatsapp_message
-    || `Hello Craftsman Galore, I'm interested in the *${product.name}* (KSh ${product.price?.toLocaleString()}). Please share more details.`;
+    ? `${product.whatsapp_message}${imageLink}`
+    : `Hello Craftsman Galore, I'm interested in the *${product.name}* (KSh ${product.price?.toLocaleString()}). Please share more details.${imageLink}`;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md" onClick={onClose}>
