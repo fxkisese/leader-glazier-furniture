@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Eye, Star } from "lucide-react";
+import { MessageCircle, Eye, Star, ShoppingBag } from "lucide-react";
 import ProductQuickView from "./ProductQuickView";
+import CheckoutModal from "@/components/checkout/CheckoutModal";
 
 const LABEL_CONFIG = {
   "new-arrival": { label: "New Arrival", class: "bg-blue-100 text-blue-700" },
@@ -15,6 +16,7 @@ const WHATSAPP = "254722914819";
 
 export default function ProductCard({ product }) {
   const [showQuickView, setShowQuickView] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   const waMessage = product.whatsapp_message
     || `Hello Craftsman Galore, I'm interested in the *${product.name}* (KSh ${product.price?.toLocaleString()}). Please share more details.`;
@@ -88,32 +90,44 @@ export default function ProductCard({ product }) {
             )}
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2">
             <Button
               size="sm"
-              variant="outline"
-              className="flex-1 border-primary/30 text-primary hover:bg-primary hover:text-white rounded-lg text-xs"
-              onClick={() => setShowQuickView(true)}
+              className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white rounded-lg text-xs gap-1 shadow-sm"
+              onClick={(e) => { e.stopPropagation(); setShowCheckout(true); }}
             >
-              View Details
+              <ShoppingBag className="w-3 h-3" /> Buy Now
             </Button>
-            <a
-              href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(waMessage)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Button size="sm" className="w-full bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs gap-1">
-                <MessageCircle className="w-3 h-3" /> WhatsApp
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex-1 border-primary/30 text-primary hover:bg-primary hover:text-white rounded-lg text-xs"
+                onClick={() => setShowQuickView(true)}
+              >
+                View Details
               </Button>
-            </a>
+              <a
+                href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(waMessage)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Button size="sm" className="w-full bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs gap-1">
+                  <MessageCircle className="w-3 h-3" /> WhatsApp
+                </Button>
+              </a>
+            </div>
           </div>
         </div>
       </div>
 
       {showQuickView && (
         <ProductQuickView product={product} onClose={() => setShowQuickView(false)} />
+      )}
+      {showCheckout && (
+        <CheckoutModal product={product} onClose={() => setShowCheckout(false)} />
       )}
     </>
   );

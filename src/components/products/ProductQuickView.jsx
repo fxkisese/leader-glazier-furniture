@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { X, MessageCircle, Phone, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { X, MessageCircle, Phone, ChevronLeft, ChevronRight, Check, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import CheckoutModal from "@/components/checkout/CheckoutModal";
 
 const WHATSAPP = "254700000000";
 
 export default function ProductQuickView({ product, onClose }) {
   const [imgIndex, setImgIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
   const images = product.images || [];
 
   const waMessage = product.whatsapp_message
@@ -137,20 +139,33 @@ export default function ProductQuickView({ product, onClose }) {
             )}
           </div>
 
-          <div className="mt-8 pt-6 border-t border-border flex flex-col sm:flex-row gap-3 sticky bottom-0 bg-white">
-            <a href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(waMessage)}`} target="_blank" rel="noopener noreferrer" className="flex-1">
-              <Button className="w-full bg-[#25D366] hover:bg-[#1ebd5b] text-white h-14 text-base font-semibold shadow-lg shadow-[#25D366]/20 gap-2 rounded-xl transition-transform hover:-translate-y-0.5">
-                <MessageCircle className="w-5 h-5" /> Order on WhatsApp
-              </Button>
-            </a>
-            <a href={`tel:+${WHATSAPP}`} className="sm:w-20">
-              <Button variant="outline" className="w-full h-14 border-primary/30 text-primary hover:bg-primary hover:text-white rounded-xl shadow-sm">
-                <Phone className="w-5 h-5" />
-              </Button>
-            </a>
+          <div className="mt-8 pt-6 border-t border-border flex flex-col gap-3 sticky bottom-0 bg-white">
+            <Button
+              className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white h-14 text-base font-semibold shadow-lg shadow-primary/20 gap-2 rounded-xl transition-all hover:-translate-y-0.5"
+              onClick={() => setShowCheckout(true)}
+            >
+              <ShoppingBag className="w-5 h-5" /> Buy Now — KSh {(product.discount_price || product.price)?.toLocaleString()}
+            </Button>
+            <div className="flex gap-3">
+              <a href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(waMessage)}`} target="_blank" rel="noopener noreferrer" className="flex-1">
+                <Button className="w-full bg-[#25D366] hover:bg-[#1ebd5b] text-white h-12 text-sm font-semibold shadow-lg shadow-[#25D366]/20 gap-2 rounded-xl transition-transform hover:-translate-y-0.5">
+                  <MessageCircle className="w-4 h-4" /> WhatsApp
+                </Button>
+              </a>
+              <a href={`tel:+${WHATSAPP}`} className="w-16">
+                <Button variant="outline" className="w-full h-12 border-primary/30 text-primary hover:bg-primary hover:text-white rounded-xl shadow-sm">
+                  <Phone className="w-4 h-4" />
+                </Button>
+              </a>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Checkout Modal */}
+      {showCheckout && (
+        <CheckoutModal product={product} onClose={() => setShowCheckout(false)} />
+      )}
 
       {/* Fullscreen Zoom Overlay */}
       {isFullscreen && (

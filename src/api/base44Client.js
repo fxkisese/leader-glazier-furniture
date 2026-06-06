@@ -67,6 +67,7 @@ const makeEntity = (tableName) => ({
 export const base44 = {
   entities: {
     Product: makeEntity('products'),
+    Order: makeEntity('orders'),
     GlassType: makeEntity('glass_types'),
     QuoteRequest: makeEntity('quote_requests'),
     CustomOrderRequest: makeEntity('custom_order_requests'),

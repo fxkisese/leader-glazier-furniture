@@ -6,12 +6,13 @@ import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Package, Layers, MessageSquare, Star, Image, Settings, Plus, Edit, Trash2, Eye, LayoutDashboard, Lock, Sparkles, Upload } from "lucide-react";
+import { Package, Layers, MessageSquare, Star, Image, Settings, Plus, Edit, Trash2, Eye, LayoutDashboard, Lock, Sparkles, Upload, ShoppingBag } from "lucide-react";
 import AdminProductsTab from "../components/admin/AdminProductsTab";
 import AdminGlassTab from "../components/admin/AdminGlassTab";
 import AdminQuotesTab from "../components/admin/AdminQuotesTab";
 import AdminCustomOrdersTab from "../components/admin/AdminCustomOrdersTab";
 import AdminBatchTab from "../components/admin/AdminBatchTab";
+import AdminOrdersTab from "../components/admin/AdminOrdersTab";
 
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "admin2020";
 
@@ -61,10 +62,11 @@ function PasswordGate({ onUnlock }) {
 const TABS = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "products", label: "Furniture", icon: Package },
+  { id: "payment-orders", label: "Orders", icon: ShoppingBag },
   { id: "batch", label: "Bulk Upload", icon: Upload },
   { id: "glass", label: "Glass Types", icon: Layers },
   { id: "quotes", label: "Quote Requests", icon: MessageSquare },
-  { id: "orders", label: "Custom Orders", icon: Star },
+  { id: "custom-orders", label: "Custom Orders", icon: Star },
 ];
 
 export default function AdminDashboard() {
@@ -110,10 +112,11 @@ export default function AdminDashboard() {
 
         {tab === "overview" && <AdminOverview />}
         {tab === "products" && <AdminProductsTab />}
+        {tab === "payment-orders" && <AdminOrdersTab />}
         {tab === "batch" && <AdminBatchTab />}
         {tab === "glass" && <AdminGlassTab />}
         {tab === "quotes" && <AdminQuotesTab />}
-        {tab === "orders" && <AdminCustomOrdersTab />}
+        {tab === "custom-orders" && <AdminCustomOrdersTab />}
       </div>
     </div>
   );
