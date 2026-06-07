@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Phone, MessageCircle, Facebook, Instagram, Twitter } from "lucide-react";
+import { Menu, X, Phone, MessageCircle, Facebook, Instagram, Twitter, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/lib/CartContext";
 
 const WHATSAPP = "254110767199";
 
@@ -20,6 +21,8 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { getCartCount, setIsCartOpen } = useCart();
+  const cartCount = getCartCount();
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -58,12 +61,22 @@ export default function Navbar() {
               <a href="https://www.facebook.com/share/1HT1RuZTg7/" aria-label="Facebook" className="text-foreground/50 hover:text-primary transition-colors"><Facebook className="w-4 h-4" /></a>
               <a href="https://www.instagram.com/craftsman_galore/" aria-label="Instagram" className="text-foreground/50 hover:text-primary transition-colors"><Instagram className="w-4 h-4" /></a>
             </div>
+            <button 
+              onClick={() => setIsCartOpen(true)}
+              className="relative p-2 rounded-full hover:bg-accent/60 transition-colors text-foreground/70 hover:text-primary"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white bg-primary rounded-full transform translate-x-1/4 -translate-y-1/4">
+                  {cartCount}
+                </span>
+              )}
+            </button>
             <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer">
               <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-2 rounded-full">
                 <MessageCircle className="w-4 h-4" /> WhatsApp
               </Button>
             </a>
-
           </div>
 
           {/* Mobile toggle */}
@@ -90,12 +103,17 @@ export default function Navbar() {
             <a href="https://www.instagram.com/craftsman_galore/" aria-label="Instagram" className="p-2 text-foreground/50 hover:text-primary transition-colors"><Instagram className="w-5 h-5" /></a>
           </div>
           <div className="flex gap-2 pt-2">
+            <button 
+              onClick={() => setIsCartOpen(true)}
+              className="flex-1 flex items-center justify-center gap-2 p-2 rounded-lg bg-accent/50 text-foreground/80 hover:bg-accent hover:text-primary transition-colors"
+            >
+              <ShoppingCart className="w-4 h-4" /> Cart ({cartCount})
+            </button>
             <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="flex-1">
               <Button size="sm" className="w-full bg-green-600 hover:bg-green-700 text-white gap-2">
                 <MessageCircle className="w-4 h-4" /> WhatsApp
               </Button>
             </a>
-
           </div>
         </div>
       )}

@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, ChevronRight, Calculator } from "lucide-react";
@@ -13,6 +14,32 @@ export default function HeroSection() {
   });
 
   const heroImages = featuredProducts.map(p => p.images?.[0]).filter(Boolean);
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const fallbackImages = [
+    "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=600&fit=crop",
+    "https://images.unsplash.com/photo-1558997519-83ea9252edc8?w=800&h=600&fit=crop",
+    "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800&h=600&fit=crop",
+    "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=600&fit=crop"
+  ];
+
+  const wordplays = [
+    "Sofa, so good.",
+    "Take a seat, you've earned it.",
+    "Wood you believe it?",
+    "Table your worries.",
+    "We've got your back (and your seat)."
+  ];
+
+  const displayImages = heroImages.length > 0 ? heroImages : fallbackImages;
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % displayImages.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [displayImages.length]);
 
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-[#f8f5ff] via-white to-[#f0ebff]">
@@ -70,62 +97,29 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* Image grid */}
-          <div className="relative hidden lg:block">
-            {heroImages.length > 0 ? (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-4">
-                  <div className="rounded-2xl overflow-hidden aspect-[4/5] shadow-xl shadow-primary/10 bg-muted/20">
-                    <img
-                      src={heroImages[0]}
-                      alt="Featured Handcrafted Furniture"
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                    />
-                  </div>
-                  {heroImages[1] && (
-                    <div className="rounded-2xl overflow-hidden aspect-square shadow-lg shadow-primary/10 bg-muted/20">
-                      <img
-                        src={heroImages[1]}
-                        alt="Kenyan Artisan Furniture"
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                      />
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-4 pt-8">
-                  {heroImages[2] && (
-                    <div className="rounded-2xl overflow-hidden aspect-square shadow-lg shadow-primary/10 bg-muted/20">
-                      <img
-                        src={heroImages[2]}
-                        alt="Bespoke Furniture Piece"
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                      />
-                    </div>
-                  )}
-                  {heroImages[3] && (
-                    <div className="rounded-2xl overflow-hidden aspect-[4/5] shadow-xl shadow-primary/10 bg-muted/20">
-                      <img
-                        src={heroImages[3]}
-                        alt="Custom Made Furniture"
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                      />
-                    </div>
-                  )}
+          {/* Image Shuffler */}
+          <div className="relative hidden lg:block h-[600px] w-full rounded-3xl overflow-hidden shadow-2xl bg-muted/20 border border-primary/10">
+            {displayImages.map((src, idx) => (
+              <div 
+                key={idx}
+                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+              >
+                <img
+                  src={src}
+                  alt="Furniture"
+                  className="w-full h-full object-cover scale-105"
+                />
+                <div className="absolute inset-0 bg-black/20" />
+                <div className="absolute bottom-12 left-0 right-0 text-center px-4 animate-fade-up">
+                  <p className="text-white font-playfair text-3xl font-bold italic tracking-wide drop-shadow-md bg-black/30 inline-block px-6 py-2 rounded-full backdrop-blur-sm">
+                    {wordplays[idx % wordplays.length]}
+                  </p>
                 </div>
               </div>
-            ) : (
-              <div className="w-full h-[600px] rounded-3xl bg-primary/5 border border-primary/10 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                    <span className="text-2xl">🛋️</span>
-                  </div>
-                  <p className="text-muted-foreground text-sm">Add featured products to display images here</p>
-                </div>
-              </div>
-            )}
+            ))}
 
             {/* Floating card */}
-            <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-xl shadow-primary/15 p-4 flex items-center gap-3 border border-border">
+            <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-xl shadow-primary/15 p-4 flex items-center gap-3 border border-border z-20">
               <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
                 <Calculator className="w-5 h-5 text-primary" />
               </div>

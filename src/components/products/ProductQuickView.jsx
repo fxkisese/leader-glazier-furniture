@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { X, MessageCircle, Phone, ChevronLeft, ChevronRight, Check, ShoppingBag, Share2, Facebook, Twitter, Link as LinkIcon } from "lucide-react";
+import { X, MessageCircle, Phone, ChevronLeft, ChevronRight, Check, ShoppingBag, ShoppingCart, Share2, Facebook, Twitter, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import CheckoutModal from "@/components/checkout/CheckoutModal";
+import { useCart } from "@/lib/CartContext";
 
 const WHATSAPP = "254110767199";
 
@@ -10,6 +11,7 @@ export default function ProductQuickView({ product, onClose }) {
   const [imgIndex, setImgIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
+  const { addToCart } = useCart();
   const images = product.images || [];
 
   const waMessage = product.whatsapp_message
@@ -169,12 +171,24 @@ export default function ProductQuickView({ product, onClose }) {
           </div>
 
           <div className="mt-8 pt-6 border-t border-border flex flex-col gap-3 sticky bottom-0 bg-white">
-            <Button
-              className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white h-14 text-base font-semibold shadow-lg shadow-primary/20 gap-2 rounded-xl transition-all hover:-translate-y-0.5"
-              onClick={() => setShowCheckout(true)}
-            >
-              <ShoppingBag className="w-5 h-5" /> Buy Now — KSh {(product.discount_price || product.price)?.toLocaleString()}
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 h-14 text-base font-semibold border-primary text-primary hover:bg-primary/5 rounded-xl transition-all"
+                onClick={() => {
+                  addToCart(product);
+                  onClose();
+                }}
+              >
+                <ShoppingCart className="w-5 h-5 mr-2" /> Add to Cart
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white h-14 text-base font-semibold shadow-lg shadow-primary/20 rounded-xl transition-all hover:-translate-y-0.5"
+                onClick={() => setShowCheckout(true)}
+              >
+                <ShoppingBag className="w-5 h-5 mr-2" /> Buy Now
+              </Button>
+            </div>
             <div className="flex gap-3">
               <a href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(waMessage)}`} target="_blank" rel="noopener noreferrer" className="flex-1">
                 <Button className="w-full bg-[#25D366] hover:bg-[#1ebd5b] text-white h-12 text-sm font-semibold shadow-lg shadow-[#25D366]/20 gap-2 rounded-xl transition-transform hover:-translate-y-0.5">

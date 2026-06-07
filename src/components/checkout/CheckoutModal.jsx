@@ -129,7 +129,7 @@ function StripeCardForm({ product, paymentType, customerInfo, onSuccess, onError
 }
 
 /* ──────── Main Checkout Modal ──────── */
-export default function CheckoutModal({ product, onClose }) {
+export default function CheckoutModal({ product, cartItems, onClose }) {
   const [step, setStep] = useState("details"); // details → payment → processing → success → error
   const [paymentMethod, setPaymentMethod] = useState("mpesa");
   const [paymentType, setPaymentType] = useState("full");
@@ -142,7 +142,20 @@ export default function CheckoutModal({ product, onClose }) {
   const [mpesaState, setMpesaState] = useState({ orderId: null, polling: false, error: null });
   const [result, setResult] = useState(null);
 
-  const actualPrice = product.discount_price || product.price;
+  const isCart = cartItems && cartItems.length > 0;
+  const targetItems = isCart ? cartItems : (product ? [product] : []);
+  
+  const actualPrice = targetItems.reduce((total, item) => total + ((item.discount_price || item.price) * (item.quantity || 1)), 0);
+  
+  const computedProduct = isCart ? {
+    id: "cart_checkout",
+    name: targetItems.map(i => `${i.name} (x${i.quantity})`).join(", "),
+    images: targetItems[0]?.images || [],
+    price: actualPrice,
+    discount_price: actualPrice,
+    category: "Multiple Items",
+  } : product;
+
   const payAmount = paymentType === "deposit" ? Math.ceil(actualPrice / 2) : actualPrice;
   const balanceAfter = paymentType === "deposit" ? actualPrice - payAmount : 0;
 
@@ -162,9 +175,9 @@ export default function CheckoutModal({ product, onClose }) {
         body: JSON.stringify({
           phone: customerInfo.customer_phone,
           amount: payAmount,
-          product_id: product.id,
-          product_name: product.name,
-          product_image: product.images?.[0] || null,
+          product_id: computedProduct.id,
+          product_name: computedProduct.name,
+          product_image: computedProduct.images?.[0] || null,
           product_price: actualPrice,
           payment_type: paymentType,
           ...customerInfo,
@@ -245,22 +258,22 @@ export default function CheckoutModal({ product, onClose }) {
         {/* ─── Product Summary (always visible) ─── */}
         {step !== "success" && step !== "error" && (
           <div className="mx-5 mt-4 p-4 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-2xl flex gap-4 items-center border border-gray-100">
-            {product.images?.[0] ? (
-              <img src={product.images[0]} alt={product.name} className="w-20 h-20 object-cover rounded-xl shadow-sm flex-shrink-0" />
+            {computedProduct?.images?.[0] ? (
+              <img src={computedProduct.images[0]} alt={computedProduct.name} className="w-20 h-20 object-cover rounded-xl shadow-sm flex-shrink-0" />
             ) : (
               <div className="w-20 h-20 bg-gray-100 rounded-xl flex items-center justify-center text-3xl flex-shrink-0">🛋️</div>
             )}
             <div className="min-w-0">
-              <h3 className="font-semibold text-gray-900 text-sm line-clamp-2">{product.name}</h3>
-              <p className="text-xs text-gray-500 mt-0.5">{product.category?.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</p>
+              <h3 className="font-semibold text-gray-900 text-sm line-clamp-2">{computedProduct?.name}</h3>
+              <p className="text-xs text-gray-500 mt-0.5">{computedProduct?.category?.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</p>
               <div className="flex items-center gap-2 mt-1.5">
-                {product.discount_price ? (
+                {computedProduct?.discount_price ? (
                   <>
-                    <span className="text-lg font-bold text-primary">KSh {product.discount_price?.toLocaleString()}</span>
-                    <span className="text-xs text-gray-400 line-through">KSh {product.price?.toLocaleString()}</span>
+                    <span className="text-lg font-bold text-primary">KSh {computedProduct.discount_price?.toLocaleString()}</span>
+                    <span className="text-xs text-gray-400 line-through">KSh {computedProduct.price?.toLocaleString()}</span>
                   </>
                 ) : (
-                  <span className="text-lg font-bold text-primary">KSh {product.price?.toLocaleString()}</span>
+                  <span className="text-lg font-bold text-primary">KSh {computedProduct?.price?.toLocaleString()}</span>
                 )}
               </div>
             </div>
@@ -428,7 +441,7 @@ export default function CheckoutModal({ product, onClose }) {
             stripePromise ? (
               <Elements stripe={stripePromise} options={{ appearance: { theme: "stripe", variables: { borderRadius: "12px" } } }}>
                 <StripeCardForm
-                  product={product}
+                  product={computedProduct}
                   paymentType={paymentType}
                   customerInfo={customerInfo}
                   onSuccess={handleStripeSuccess}

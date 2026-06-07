@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Eye, Star, ShoppingBag } from "lucide-react";
+import { MessageCircle, Eye, Star, ShoppingBag, ShoppingCart } from "lucide-react";
 import ProductQuickView from "./ProductQuickView";
 import CheckoutModal from "@/components/checkout/CheckoutModal";
+import { useCart } from "@/lib/CartContext";
 
 const LABEL_CONFIG = {
   "new-arrival": { label: "New Arrival", class: "bg-blue-100 text-blue-700" },
@@ -17,6 +18,7 @@ const WHATSAPP = "254110767199";
 export default function ProductCard({ product }) {
   const [showQuickView, setShowQuickView] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
+  const { addToCart } = useCart();
 
   const waMessage = product.whatsapp_message
     || (product.images?.[0] ? product.images[0] : `Hello Craftsman Galore, I'm interested in the *${product.name}* (KSh ${product.price?.toLocaleString()}). Please share more details.`);
@@ -44,13 +46,22 @@ export default function ProductCard({ product }) {
           )}
           {/* Overlay on hover */}
           <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-300 flex items-center justify-center">
-            <Button
-              size="sm"
-              className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white text-primary hover:bg-primary hover:text-white rounded-full"
-              onClick={() => setShowQuickView(true)}
-            >
-              <Eye className="w-4 h-4 mr-1" /> Quick View
-            </Button>
+            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <Button
+                size="icon"
+                className="bg-white text-primary hover:bg-primary hover:text-white rounded-full h-10 w-10 shadow-lg"
+                onClick={(e) => { e.stopPropagation(); addToCart(product); }}
+              >
+                <ShoppingCart className="w-5 h-5" />
+              </Button>
+              <Button
+                size="sm"
+                className="bg-white text-primary hover:bg-primary hover:text-white rounded-full h-10 px-4 shadow-lg"
+                onClick={(e) => { e.stopPropagation(); setShowQuickView(true); }}
+              >
+                <Eye className="w-4 h-4 mr-1" /> Quick View
+              </Button>
+            </div>
           </div>
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1">
@@ -102,10 +113,10 @@ export default function ProductCard({ product }) {
               <Button
                 size="sm"
                 variant="outline"
-                className="flex-1 border-primary/30 text-primary hover:bg-primary hover:text-white rounded-lg text-xs"
-                onClick={() => setShowQuickView(true)}
+                className="flex-1 border-primary/30 text-primary hover:bg-primary hover:text-white rounded-lg text-xs gap-1"
+                onClick={(e) => { e.stopPropagation(); addToCart(product); }}
               >
-                View Details
+                <ShoppingCart className="w-3 h-3" /> Cart
               </Button>
               <a
                 href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(waMessage)}`}
