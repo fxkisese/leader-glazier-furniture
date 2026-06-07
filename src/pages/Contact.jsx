@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Phone, MessageCircle, MapPin, Mail, Send, CheckCircle2 } from "lucide-react";
+import { Phone, MessageCircle, MapPin, Mail, Send, CheckCircle2, Facebook, Instagram, Twitter } from "lucide-react";
 
 const WHATSAPP = "254110767199";
 
@@ -38,8 +38,11 @@ export default function Contact() {
                 {[
                   { icon: MessageCircle, title: "WhatsApp (Fastest)", value: "+254 110 767 199", href: `https://wa.me/${WHATSAPP}`, color: "text-green-600", bg: "bg-green-50" },
                   { icon: Phone, title: "Phone Call", value: "+254 110 767 199", href: `tel:+${WHATSAPP}`, color: "text-primary", bg: "bg-primary/5" },
-                  { icon: Mail, title: "Email", value: "info@leaderglazierfurniture.co.ke", href: "mailto:info@leaderglazierfurniture.co.ke", color: "text-primary", bg: "bg-primary/5" },
+                  { icon: Mail, title: "Email", value: "furniture@craftsmangalore.homes", href: "mailto:furniture@craftsmangalore.homes", color: "text-primary", bg: "bg-primary/5" },
                   { icon: MapPin, title: "Location", value: "Nairobi & Machakos, Kenya — Countrywide Delivery", href: null, color: "text-primary", bg: "bg-primary/5" },
+                  { icon: Facebook, title: "Facebook", value: "@craftsmangalore", href: "#", color: "text-blue-600", bg: "bg-blue-50" },
+                  { icon: Instagram, title: "Instagram", value: "@craftsmangalore", href: "#", color: "text-pink-600", bg: "bg-pink-50" },
+                  { icon: Twitter, title: "Twitter", value: "@craftsmangalore", href: "#", color: "text-sky-500", bg: "bg-sky-50" },
                 ].map(({ icon: Icon, title, value, href, color, bg }) => (
                   <div key={title} className="flex items-start gap-4 p-4 rounded-2xl border border-border hover:border-primary/20 transition-colors">
                     <div className={`w-10 h-10 ${bg} rounded-xl flex items-center justify-center shrink-0`}>

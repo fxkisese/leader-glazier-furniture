@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Phone, MessageCircle, MapPin, Mail } from "lucide-react";
+import { Phone, MessageCircle, MapPin, Mail, Facebook, Instagram, Twitter } from "lucide-react";
 
 const WHATSAPP = "254110767199";
 
@@ -66,9 +66,23 @@ export default function Footer() {
               </li>
               <li className="flex items-start gap-2">
                 <Mail className="w-4 h-4 mt-0.5 shrink-0 text-gold" />
-                <span>info@leaderglazierfurniture.co.ke</span>
+                <span>furniture@craftsmangalore.homes</span>
               </li>
             </ul>
+            <div className="pt-4 border-t border-white/10 mt-4">
+              <h4 className="font-semibold text-white text-sm uppercase tracking-wider mb-3">Follow Us</h4>
+              <div className="flex gap-4">
+                <a href="#" aria-label="Facebook" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-primary-foreground/70 hover:bg-gold hover:text-primary transition-all">
+                  <Facebook className="w-4 h-4" />
+                </a>
+                <a href="#" aria-label="Instagram" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-primary-foreground/70 hover:bg-gold hover:text-primary transition-all">
+                  <Instagram className="w-4 h-4" />
+                </a>
+                <a href="#" aria-label="Twitter" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-primary-foreground/70 hover:bg-gold hover:text-primary transition-all">
+                  <Twitter className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, MessageCircle, Phone, ChevronLeft, ChevronRight, Check, ShoppingBag } from "lucide-react";
+import { X, MessageCircle, Phone, ChevronLeft, ChevronRight, Check, ShoppingBag, Share2, Facebook, Twitter, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import CheckoutModal from "@/components/checkout/CheckoutModal";
@@ -14,6 +14,15 @@ export default function ProductQuickView({ product, onClose }) {
 
   const waMessage = product.whatsapp_message
     || (product.images?.[0] ? product.images[0] : `Hello Craftsman Galore, I'm interested in the *${product.name}* (KSh ${product.price?.toLocaleString()}). Please share more details.`);
+
+  const currentUrl = window.location.href;
+  const encodedUrl = encodeURIComponent(currentUrl);
+  const encodedTitle = encodeURIComponent(`Check out ${product.name} at Craftsman Galore!`);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(currentUrl);
+    alert("Link copied to clipboard!");
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md" onClick={onClose}>
@@ -137,6 +146,26 @@ export default function ProductQuickView({ product, onClose }) {
                 <p className="text-sm text-primary font-medium">{product.delivery_note}</p>
               </div>
             )}
+
+            <div className="pt-4 border-t border-border mt-4">
+              <p className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                <Share2 className="w-4 h-4" /> Share this product
+              </p>
+              <div className="flex gap-2">
+                <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 transition-colors">
+                  <Facebook className="w-4 h-4" />
+                </a>
+                <a href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-sky-50 text-sky-500 flex items-center justify-center hover:bg-sky-100 transition-colors">
+                  <Twitter className="w-4 h-4" />
+                </a>
+                <a href={`https://wa.me/?text=${encodedTitle}%20${encodedUrl}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-100 transition-colors">
+                  <MessageCircle className="w-4 h-4" />
+                </a>
+                <button onClick={handleCopyLink} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200 transition-colors">
+                  <LinkIcon className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="mt-8 pt-6 border-t border-border flex flex-col gap-3 sticky bottom-0 bg-white">
