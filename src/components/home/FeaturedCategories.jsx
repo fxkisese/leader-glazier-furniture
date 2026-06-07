@@ -75,8 +75,9 @@ function CategoryCard({ cat, index }) {
       initial={{ opacity: 0, y: 32 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: (index % 4) * 0.08 }}
+      className="h-full"
     >
-      <Link to={cat.path} className="group block relative overflow-hidden rounded-2xl">
+      <Link to={cat.path} className="group block relative h-full overflow-hidden rounded-2xl">
         {/* Image */}
         <div className="overflow-hidden w-full h-full bg-muted/20">
           {cat.image ? (
