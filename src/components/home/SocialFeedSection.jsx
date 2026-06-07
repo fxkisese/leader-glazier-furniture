@@ -73,7 +73,7 @@ export default function SocialFeedSection() {
         </div>
 
         <div className="mt-12 text-center">
-          <a href="#" target="_blank" rel="noopener noreferrer">
+          <a href="https://www.instagram.com/craftsman_galore/" target="_blank" rel="noopener noreferrer">
             <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 rounded-full px-8">
               <Instagram className="w-5 h-5" /> View Full Gallery
             </Button>

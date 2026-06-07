@@ -40,9 +40,8 @@ export default function Contact() {
                   { icon: Phone, title: "Phone Call", value: "+254 110 767 199", href: `tel:+${WHATSAPP}`, color: "text-primary", bg: "bg-primary/5" },
                   { icon: Mail, title: "Email", value: "furniture@craftsmangalore.homes", href: "mailto:furniture@craftsmangalore.homes", color: "text-primary", bg: "bg-primary/5" },
                   { icon: MapPin, title: "Location", value: "Nairobi & Machakos, Kenya — Countrywide Delivery", href: null, color: "text-primary", bg: "bg-primary/5" },
-                  { icon: Facebook, title: "Facebook", value: "@craftsmangalore", href: "#", color: "text-blue-600", bg: "bg-blue-50" },
-                  { icon: Instagram, title: "Instagram", value: "@craftsmangalore", href: "#", color: "text-pink-600", bg: "bg-pink-50" },
-                  { icon: Twitter, title: "Twitter", value: "@craftsmangalore", href: "#", color: "text-sky-500", bg: "bg-sky-50" },
+                  { icon: Facebook, title: "Facebook", value: "Craftsman Galore", href: "https://www.facebook.com/share/1HT1RuZTg7/", color: "text-blue-600", bg: "bg-blue-50" },
+                  { icon: Instagram, title: "Instagram", value: "@craftsman_galore", href: "https://www.instagram.com/craftsman_galore/", color: "text-pink-600", bg: "bg-pink-50" },
                 ].map(({ icon: Icon, title, value, href, color, bg }) => (
                   <div key={title} className="flex items-start gap-4 p-4 rounded-2xl border border-border hover:border-primary/20 transition-colors">
                     <div className={`w-10 h-10 ${bg} rounded-xl flex items-center justify-center shrink-0`}>

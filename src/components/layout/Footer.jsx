@@ -72,14 +72,11 @@ export default function Footer() {
             <div className="pt-4 border-t border-white/10 mt-4">
               <h4 className="font-semibold text-white text-sm uppercase tracking-wider mb-3">Follow Us</h4>
               <div className="flex gap-4">
-                <a href="#" aria-label="Facebook" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-primary-foreground/70 hover:bg-gold hover:text-primary transition-all">
+                <a href="https://www.facebook.com/share/1HT1RuZTg7/" aria-label="Facebook" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-primary-foreground/70 hover:bg-gold hover:text-primary transition-all">
                   <Facebook className="w-4 h-4" />
                 </a>
-                <a href="#" aria-label="Instagram" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-primary-foreground/70 hover:bg-gold hover:text-primary transition-all">
+                <a href="https://www.instagram.com/craftsman_galore/" aria-label="Instagram" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-primary-foreground/70 hover:bg-gold hover:text-primary transition-all">
                   <Instagram className="w-4 h-4" />
-                </a>
-                <a href="#" aria-label="Twitter" className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-primary-foreground/70 hover:bg-gold hover:text-primary transition-all">
-                  <Twitter className="w-4 h-4" />
                 </a>
               </div>
             </div>
