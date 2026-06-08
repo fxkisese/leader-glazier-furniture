@@ -8,12 +8,23 @@ import { base44 } from "@/api/base44Client";
 const WHATSAPP = "254110767199";
 
 export default function HeroSection() {
-  const { data: featuredProducts = [] } = useQuery({
-    queryKey: ["hero-products"],
-    queryFn: () => base44.entities.Product.filter({ is_featured: true, is_published: true }, "homepage_order", 4),
+  const { data: allProducts = [] } = useQuery({
+    queryKey: ["hero-products-all"],
+    queryFn: () => base44.entities.Product.filter({ is_published: true }, "-created_date", 20),
   });
 
-  const heroImages = featuredProducts.map(p => p.images?.[0]).filter(Boolean);
+  // Try to use featured products first
+  let heroImages = allProducts
+    .filter(p => p.is_featured && p.images?.length > 0)
+    .map(p => p.images[0]);
+
+  // If no featured products have images, use any recent product with an image
+  if (heroImages.length === 0) {
+    heroImages = allProducts
+      .filter(p => p.images?.length > 0)
+      .map(p => p.images[0])
+      .slice(0, 6);
+  }
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -98,18 +109,25 @@ export default function HeroSection() {
           </div>
 
           {/* Image Shuffler */}
-          <div className="relative hidden lg:block h-[600px] w-full rounded-3xl overflow-hidden shadow-2xl bg-muted/20 border border-primary/10">
+          <div className="relative hidden lg:block h-[600px] w-full rounded-3xl overflow-hidden shadow-2xl bg-[#f8f5ff] border border-primary/10">
             {displayImages.map((src, idx) => (
               <div 
                 key={idx}
                 className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
               >
+                {/* Blurred background */}
+                <img
+                  src={src}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 scale-110"
+                  aria-hidden="true"
+                />
                 <img
                   src={src}
                   alt="Furniture"
-                  className="w-full h-full object-cover scale-105"
+                  className="relative w-full h-full object-contain scale-[1.02]"
                 />
-                <div className="absolute inset-0 bg-black/20" />
+                <div className="absolute inset-0 bg-black/10 pointer-events-none" />
                 <div className="absolute bottom-12 left-0 right-0 text-center px-4 animate-fade-up">
                   <p className="text-white font-playfair text-3xl font-bold italic tracking-wide drop-shadow-md bg-black/30 inline-block px-6 py-2 rounded-full backdrop-blur-sm">
                     {wordplays[idx % wordplays.length]}

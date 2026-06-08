@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useInView } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -68,6 +68,17 @@ const CATEGORIES_TEMPLATE = [
 function CategoryCard({ cat, index }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+  const [currentIdx, setCurrentIdx] = useState(0);
+
+  const images = cat.images || [];
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentIdx((prev) => (prev + 1) % images.length);
+    }, 4000 + (index * 500)); // slightly stagger the timers
+    return () => clearInterval(timer);
+  }, [images.length, index]);
 
   return (
     <motion.div
@@ -78,15 +89,29 @@ function CategoryCard({ cat, index }) {
       className="h-full"
     >
       <Link to={cat.path} className="group block relative h-full overflow-hidden rounded-2xl">
-        {/* Image */}
-        <div className="overflow-hidden w-full h-full bg-muted/20">
-          {cat.image ? (
-            <img
-              src={cat.image}
-              alt={cat.label}
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-              loading="lazy"
-            />
+        {/* Images */}
+        <div className="relative overflow-hidden w-full h-full bg-[#f8f5ff]">
+          {images.length > 0 ? (
+            images.map((imgSrc, idx) => (
+              <div 
+                key={idx}
+                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentIdx ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+              >
+                {/* Blurred background for a premium look when object-contain leaves space */}
+                <img 
+                  src={imgSrc} 
+                  alt="" 
+                  className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 scale-110" 
+                  aria-hidden="true" 
+                />
+                <img
+                  src={imgSrc}
+                  alt={cat.label}
+                  className="relative w-full h-full object-contain transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+                  loading="lazy"
+                />
+              </div>
+            ))
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-primary/5">
               <span className="text-4xl opacity-30">🛋️</span>
@@ -135,15 +160,16 @@ export default function FeaturedCategories() {
   });
 
   const categories = CATEGORIES_TEMPLATE.map((cat) => {
-    let img = null;
+    let imgs = [];
     if (cat.categoryId === "glass") {
-      img = glassTypes.find(g => g.image)?.image || null;
+      imgs = glassTypes.map(g => g.image).filter(Boolean);
     } else if (cat.categoryId === "custom") {
-      img = null; // We can leave custom without image and let accent take over
+      imgs = []; // Custom without image lets accent take over
     } else {
-      img = products.find(p => p.category === cat.categoryId && p.images?.[0])?.images?.[0] || null;
+      const matchingProducts = products.filter(p => p.category === cat.categoryId && p.images?.length > 0);
+      imgs = matchingProducts.flatMap(p => p.images).filter(Boolean);
     }
-    return { ...cat, image: img };
+    return { ...cat, images: imgs };
   });
 
   // Split into layout groups
