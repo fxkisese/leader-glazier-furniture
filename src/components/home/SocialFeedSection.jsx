@@ -35,7 +35,7 @@ export default function SocialFeedSection() {
 
         {/* Elfsight Instagram Widget Container */}
         <div className="flex justify-center w-full min-h-[400px]">
-          <div className="elfsight-app-21e4f75a-8275-4572-875b-e0517aacde71 w-full" data-elfsight-app-lazy></div>
+          <div className="elfsight-app-edc7aee4-0d29-4445-bc20-ed0bcc8ef3c8 w-full" data-elfsight-app-lazy></div>
         </div>
 
         <div className="mt-12 text-center">
