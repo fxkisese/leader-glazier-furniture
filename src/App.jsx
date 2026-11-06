@@ -8,28 +8,31 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { CartProvider } from '@/lib/CartContext';
 import UserNotRegisteredError from '@/UserNotRegisteredError';
 import Layout from './components/layout/Layout';
+import { lazy, Suspense } from 'react';
 
-// Pages
+// Pages — Home ships in the main bundle; everything else loads on demand.
 import Home from './pages/Home';
-import Catalogue from './pages/Catalogue';
-import GlassWorks from './pages/GlassWorks';
-import QuoteCalculator from './pages/QuoteCalculator';
-import CustomOrders from './pages/CustomOrders';
-import Gallery from './pages/Gallery';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import AdminDashboard from './pages/AdminDashboard';
 import { FEATURES } from '@/lib/features';
+const Catalogue = lazy(() => import('./pages/Catalogue'));
+const GlassWorks = lazy(() => import('./pages/GlassWorks'));
+const QuoteCalculator = lazy(() => import('./pages/QuoteCalculator'));
+const CustomOrders = lazy(() => import('./pages/CustomOrders'));
+const Gallery = lazy(() => import('./pages/Gallery'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+
+const Spinner = () => (
+  <div className="fixed inset-0 flex items-center justify-center">
+    <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+  </div>
+);
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
   if (isLoadingPublicSettings || isLoadingAuth) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-      </div>
-    );
+    return <Spinner />;
   }
 
   if (authError) {
@@ -42,6 +45,7 @@ const AuthenticatedApp = () => {
   }
 
   return (
+    <Suspense fallback={<Spinner />}>
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
@@ -56,6 +60,7 @@ const AuthenticatedApp = () => {
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
+    </Suspense>
   );
 };
 

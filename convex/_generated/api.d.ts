@@ -18,6 +18,7 @@ import type * as glassTypes from "../glassTypes.js";
 import type * as heroMedia from "../heroMedia.js";
 import type * as hr from "../hr.js";
 import type * as inventory from "../inventory.js";
+import type * as migrations from "../migrations.js";
 import type * as payEntries from "../payEntries.js";
 import type * as permissions from "../permissions.js";
 import type * as productionJobs from "../productionJobs.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   heroMedia: typeof heroMedia;
   hr: typeof hr;
   inventory: typeof inventory;
+  migrations: typeof migrations;
   payEntries: typeof payEntries;
   permissions: typeof permissions;
   productionJobs: typeof productionJobs;
