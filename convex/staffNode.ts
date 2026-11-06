@@ -1,7 +1,7 @@
 "use node";
 // Password handling runs in Node so it can use scrypt. Passwords are never stored or returned —
 // only a salted scrypt hash.
-import { action } from "./_generated/server";
+import { action, internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
@@ -56,6 +56,24 @@ export const createAccount = action({
     await ctx.runMutation(internal.staff._insertAccount, {
       name: name.trim(), username: normalize(username), password_hash: hash(password, salt), salt, role: role as any,
     });
+  },
+});
+
+/**
+ * Recovery for a forgotten password (e.g. the CEO's). Internal, so it can't be called from the
+ * website — only by someone with deploy access to this Convex project:
+ *   npx convex run staffNode:resetPassword '{"username":"isa","password":"<new password>"}'
+ * Add --prod to target production. Signs that account out everywhere.
+ */
+export const resetPassword = internalAction({
+  args: { username: v.string(), password: v.string() },
+  handler: async (ctx, { username, password }): Promise<string> => {
+    checkPassword(password);
+    const account: any = await ctx.runQuery(internal.staff._byUsername, { username: normalize(username) });
+    if (!account) throw new Error(`No staff account with username "${normalize(username)}".`);
+    const salt = randomBytes(16).toString("hex");
+    await ctx.runMutation(internal.staff._setPassword, { id: account._id, password_hash: hash(password, salt), salt });
+    return `Password reset for ${account.username}.`;
   },
 });
 
