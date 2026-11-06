@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import { useInView } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 
@@ -65,8 +64,8 @@ const CATEGORIES_TEMPLATE = [
   },
 ];
 
-function CategoryCard({ cat, index }) {
-  const ref = useRef(null);
+function CategoryCard({ cat, index, height }) {
+  const ref    = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const [currentIdx, setCurrentIdx] = useState(0);
 
@@ -76,7 +75,7 @@ function CategoryCard({ cat, index }) {
     if (images.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentIdx((prev) => (prev + 1) % images.length);
-    }, 4000 + (index * 500)); // slightly stagger the timers
+    }, 4500 + index * 400);
     return () => clearInterval(timer);
   }, [images.length, index]);
 
@@ -85,138 +84,158 @@ function CategoryCard({ cat, index }) {
       ref={ref}
       initial={{ opacity: 0, y: 32 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: (index % 4) * 0.08 }}
+      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: (index % 4) * 0.07 }}
       className="h-full"
     >
-      <Link to={cat.path} className="group block relative h-full overflow-hidden rounded-2xl">
+      <Link
+        to={cat.path}
+        className="group block relative overflow-hidden h-full"
+        style={{ height }}
+      >
         {/* Images */}
-        <div className="relative overflow-hidden w-full h-full bg-[#f8f5ff]">
-          {images.length > 0 ? (
-            images.map((imgSrc, idx) => (
-              <div 
-                key={idx}
-                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentIdx ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-              >
-                {/* Blurred background for a premium look when object-contain leaves space */}
-                <img 
-                  src={imgSrc} 
-                  alt="" 
-                  className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 scale-110" 
-                  aria-hidden="true" 
-                />
-                <img
-                  src={imgSrc}
-                  alt={cat.label}
-                  className="relative w-full h-full object-contain transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-                  loading="lazy"
-                />
-              </div>
-            ))
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-primary/5">
-              <span className="text-4xl opacity-30">🛋️</span>
+        <div className="relative w-full h-full bg-[#2B211B]">
+          {images.map((imgSrc, idx) => (
+            <div
+              key={idx}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out
+                ${idx === currentIdx ? "opacity-100 z-10" : "opacity-0 z-0"}`}
+            >
+              <img
+                src={imgSrc}
+                alt={cat.label}
+                className="w-full h-full object-cover transition-transform [transition-duration:1200ms] ease-out group-hover:scale-110"
+                loading="lazy"
+              />
             </div>
-          )}
+          ))}
         </div>
 
-        {/* Gradient overlay — always present, deepens on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent transition-all duration-500 group-hover:from-black/85 group-hover:via-black/35" />
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 z-20
+          bg-gradient-to-t from-black/80 via-black/20 to-black/30
+          group-hover:from-black/90 group-hover:via-black/35 transition-all duration-500"
+        />
 
         {/* Accent tint for custom orders */}
         {cat.accent && (
-          <div className="absolute inset-0 bg-primary/30 mix-blend-multiply transition-opacity duration-500 group-hover:opacity-70" />
+          <div className="absolute inset-0 z-20 bg-[#2B211B]/40 mix-blend-multiply
+            group-hover:bg-[#B07A45]/15 transition-colors duration-700" />
         )}
 
+        {/* Category badge */}
+        <span className="absolute top-4 left-4 z-30 text-[9px] uppercase tracking-[0.3em]
+          text-white/80 bg-black/30 backdrop-blur-sm px-2.5 py-1">
+          {cat.sub}
+        </span>
+
         {/* Text */}
-        <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-1 group-hover:translate-y-0 transition-transform duration-500">
-          <p className="text-white/60 text-[10px] uppercase tracking-[0.18em] font-medium mb-1 transition-colors duration-300 group-hover:text-gold">
-            {cat.sub}
-          </p>
-          <h3 className="font-playfair text-white font-bold leading-tight drop-shadow-sm"
-            style={{ fontSize: "clamp(1rem, 1.4vw + 0.5rem, 1.35rem)" }}>
+        <div className="absolute bottom-0 left-0 right-0 z-30 p-5
+          translate-y-1 group-hover:translate-y-0 transition-transform duration-500">
+          <h3
+            className="font-heading text-silk font-light drop-shadow-sm leading-tight"
+            style={{ fontSize: "clamp(1.1rem, 1.8vw + 0.4rem, 1.5rem)" }}
+          >
             {cat.label}
           </h3>
+          <div className="mt-2 h-px bg-silk/0 group-hover:bg-gold transition-colors duration-500 w-8" />
         </div>
 
-        {/* Hover border glow */}
-        <div className="absolute inset-0 rounded-2xl ring-1 ring-white/0 group-hover:ring-white/20 transition-all duration-500 pointer-events-none" />
+        {/* Ring hover */}
+        <div className="absolute inset-0 z-30 ring-1 ring-white/0
+          group-hover:ring-white/15 transition-all duration-500 pointer-events-none" />
       </Link>
     </motion.div>
   );
 }
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.07 } },
+};
+
 export default function FeaturedCategories() {
-  const headerRef = useRef(null);
+  const headerRef    = useRef(null);
   const headerInView = useInView(headerRef, { once: true });
 
   const { data: products = [] } = useQuery({
     queryKey: ["category-products"],
-    queryFn: () => base44.entities.Product.list("-created_date", 100),
+    queryFn:  () => base44.entities.Product.list("-created_date", 100),
   });
 
   const { data: glassTypes = [] } = useQuery({
     queryKey: ["category-glass"],
-    queryFn: () => base44.entities.GlassType.list("-created_date", 20),
+    queryFn:  () => base44.entities.GlassType.list("-created_date", 20),
   });
 
   const categories = CATEGORIES_TEMPLATE.map((cat) => {
     let imgs = [];
     if (cat.categoryId === "glass") {
-      imgs = glassTypes.map(g => g.image).filter(Boolean);
+      imgs = glassTypes.map((g) => g.image).filter(Boolean);
     } else if (cat.categoryId === "custom") {
-      imgs = []; // Custom without image lets accent take over
+      imgs = [];
     } else {
-      const matchingProducts = products.filter(p => p.category === cat.categoryId && p.images?.length > 0);
-      imgs = matchingProducts.flatMap(p => p.images).filter(Boolean);
+      const matching = products.filter((p) => p.category === cat.categoryId && p.images?.length > 0);
+      imgs = matching.flatMap((p) => p.images).filter(Boolean);
     }
     return { ...cat, images: imgs };
   });
 
-  // Split into layout groups
   const [hero, ...rest] = categories;
-  const stack = rest.slice(0, 2);   // Wardrobes, TV Stands → right column
-  const row2 = rest.slice(2, 4);   // Beds, Mirrors → medium cards
-  const row3 = rest.slice(4, 6);   // Dining, Office → small
-  const wide = rest[6];             // Custom Orders → full-width banner
+  const stack = rest.slice(0, 2);
+  const row2  = rest.slice(2, 4);
+  const row3  = rest.slice(4, 6);
+  const wide  = rest[6];
 
   return (
-    <section className="py-16 lg:py-24" style={{ background: "#FAF8F6" }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-20 lg:py-32 bg-[#FBF8F3]">
+      <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
 
-        {/* Header */}
+        {/* Section header */}
         <motion.div
           ref={headerRef}
           initial={{ opacity: 0, y: 20 }}
           animate={headerInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="mb-10 lg:mb-14"
+          transition={{ duration: 0.7 }}
+          className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-14"
         >
-          <p className="text-gold font-medium text-xs uppercase tracking-[0.2em] mb-3">Our Collections</p>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <h2 className="font-playfair text-3xl lg:text-4xl font-bold text-foreground leading-tight max-w-sm">
-              Designed for<br className="hidden sm:block" /> Every Space
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-4 mb-5">
+              <div className="w-8 h-px bg-[#B07A45]" />
+              <p className="text-[11px] uppercase tracking-[0.35em] text-[#B07A45] font-semibold">
+                Our Collections
+              </p>
+            </div>
+            <h2
+              className="font-heading font-light text-obsidian leading-[1.1] tracking-tight"
+              style={{ fontSize: "clamp(2rem, 4vw, 3.25rem)" }}
+            >
+              Designed for<br />
+              <span className="italic font-light text-[#8A7A6B]">every space</span>
             </h2>
-            <p className="text-muted-foreground text-sm max-w-xs leading-relaxed">
-              Bespoke furniture, glass solutions, and custom orders — proudly handcrafted in Kenya and delivered countrywide.
-            </p>
           </div>
+
+          <Link
+            to="/catalogue"
+            className="hidden md:inline-flex items-center gap-2 text-[12px] uppercase
+              tracking-[0.2em] text-obsidian hover:text-[#B07A45] transition-colors duration-300"
+          >
+            View All Products →
+          </Link>
         </motion.div>
 
-        {/* ── Row 1: Large hero + 2 stacked smalls ── */}
+        {/* Row 1 — Large hero (2 cols) + 2 stacked */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4 mb-3 lg:mb-4">
-          {/* Hero — spans 2 cols */}
-          <div className="lg:col-span-2 h-[380px] lg:h-[480px]">
+          <div className="lg:col-span-2 h-[380px] lg:h-[500px]">
             <CategoryCard cat={hero} index={0} />
           </div>
-          {/* Right stack */}
-          <div className="grid grid-rows-2 gap-3 lg:gap-4 h-[280px] lg:h-[480px]">
+          <div className="grid grid-rows-2 gap-3 lg:gap-4 h-[280px] lg:h-[500px]">
             {stack.map((cat, i) => (
               <CategoryCard key={cat.label} cat={cat} index={i + 1} />
             ))}
           </div>
         </div>
 
-        {/* ── Row 2: 2 medium cards ── */}
+        {/* Row 2 — 2 medium cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4 mb-3 lg:mb-4">
           {row2.map((cat, i) => (
             <div key={cat.label} className="h-[260px]">
@@ -225,7 +244,7 @@ export default function FeaturedCategories() {
           ))}
         </div>
 
-        {/* ── Row 3: 2 small cards ── */}
+        {/* Row 3 — 2 small cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4 mb-3 lg:mb-4">
           {row3.map((cat, i) => (
             <div key={cat.label} className="h-[220px]">
@@ -234,7 +253,7 @@ export default function FeaturedCategories() {
           ))}
         </div>
 
-        {/* ── Row 4: Full-width custom orders banner ── */}
+        {/* Row 4 — Full-width custom orders banner */}
         {wide && (
           <div className="h-[200px] lg:h-[240px]">
             <CategoryCard cat={wide} index={7} />

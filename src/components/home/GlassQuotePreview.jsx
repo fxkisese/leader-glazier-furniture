@@ -40,7 +40,7 @@ export default function GlassQuotePreview() {
     <section className="py-16 lg:py-24 bg-primary text-primary-foreground relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-20 -right-20 w-72 h-72 bg-white/5 rounded-full" />
-        <div className="absolute bottom-0 left-10 w-60 h-60 bg-white/3 rounded-full" />
+        <div className="absolute bottom-0 left-10 w-60 h-60 bg-white/[0.03] rounded-full" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -89,7 +89,7 @@ export default function GlassQuotePreview() {
               </div>
             </div>
 
-            <Button onClick={calculate} className="w-full bg-gold hover:bg-gold/90 text-foreground font-semibold rounded-xl gap-2" style={{ backgroundColor: "hsl(43 74% 60%)" }}>
+            <Button onClick={calculate} className="w-full bg-gold hover:bg-gold/90 text-foreground font-semibold rounded-xl gap-2" style={{ backgroundColor: "#B07A45" }}>
               <Calculator className="w-4 h-4" /> Calculate Estimate
             </Button>
 

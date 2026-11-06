@@ -65,6 +65,48 @@ const makeEntity = (tableName) => ({
 });
 
 export const base44 = {
+  auth: {
+    me: async () => {
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+        return null;
+      }
+
+      if (!supabase?.auth?.getUser) {
+        return null;
+      }
+
+      const { data, error } = await supabase.auth.getUser();
+      if (error && error.status !== 401) {
+        throw error;
+      }
+      return data?.user ?? null;
+    },
+
+    getSession: async () => {
+      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+        return null;
+      }
+
+      if (!supabase?.auth?.getSession) {
+        return null;
+      }
+
+      const { data, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      return data?.session ?? null;
+    },
+
+    signOut: async () => {
+      if (!supabase?.auth?.signOut) {
+        return true;
+      }
+
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      return true;
+    },
+  },
+
   entities: {
     Product: makeEntity('products'),
     GlassType: makeEntity('glass_types'),

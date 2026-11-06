@@ -6,14 +6,14 @@ const BRANCHES = [
   {
     name: "Nairobi Branch",
     address: ["Whitehouse Flats, Donholm", "Along Outering Road", "Near Topgear Driving School", "Nairobi, Kenya"],
-    mapsUrl: "https://www.google.com/maps/search/Whitehouse+Flats+Donholm+Nairobi",
-    embed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.820456!2d36.874!3d-1.296!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMcKwMTcnNDYuOCJTIDM2wrA1Mic0Ni40IkU!5e0!3m2!1sen!2ske!4v1700000000000",
+    mapsUrl: "https://www.google.com/maps/search/?api=1&query=-1.29188110199024,36.88507728551707",
+    embed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d705.1276184461979!2d36.88507728551707!3d-1.29188110199024!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f138feb2484ab%3A0x55ec80639e353241!2sLeader%20Glaziers%20and%20Hardware!5e0!3m2!1sen!2ske!4v1793909341091!5m2!1sen!2ske",
   },
   {
     name: "Machakos Branch",
     address: ["Kyumbi Junction", "Machakos, Kenya"],
-    mapsUrl: "https://www.google.com/maps/search/Kyumbi+Junction+Machakos+Kenya",
-    embed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.820456!2d37.263!3d-1.519!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMcKwMzEnMDguNCJTIDM3wrAxNSc0Ni44IkU!5e0!3m2!1sen!2ske!4v1700000000000",
+    mapsUrl: "https://www.google.com/maps/search/?api=1&query=-1.5303697799454303,37.12690784933819",
+    embed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2820.2212846143434!2d37.12690784933819!3d-1.5303697799454303!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f84ad836e6061%3A0x1a59d59adc704214!2sLEADER%20GLASS%20%26%20FURNITURE%20MART!5e0!3m2!1sen!2ske!4v1793910029562!5m2!1sen!2ske",
   },
 ];
 
@@ -22,7 +22,7 @@ export default function ShowroomSection() {
   const inView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section ref={ref} className="py-16 lg:py-24" style={{ background: "#1A1A1A" }}>
+    <section ref={ref} className="py-16 lg:py-24" style={{ background: "#2B211B" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
@@ -47,14 +47,9 @@ export default function ShowroomSection() {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
             className="flex flex-col gap-6"
           >
-            {/* Showroom image */}
-            <div className="relative rounded-2xl overflow-hidden aspect-[4/3] group">
-              <img
-                src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&h=600&fit=crop&q=85"
-                alt="Craftsman Galore Showroom"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            {/* Showroom panel */}
+            <div className="relative rounded-2xl overflow-hidden aspect-[4/3] border border-white/10
+              bg-[radial-gradient(ellipse_70%_80%_at_30%_30%,rgba(176,122,69,0.28),transparent_70%)]">
               <div className="absolute bottom-0 left-0 right-0 p-6">
                 <p className="text-white font-playfair text-lg font-semibold">Craftsman Galore</p>
                 <p className="text-white/60 text-sm mt-1">Premium showroom — Nairobi & Machakos</p>
@@ -91,7 +86,7 @@ export default function ShowroomSection() {
                     width="100%"
                     height="180"
                     style={{ border: 0, filter: "grayscale(30%) contrast(1.1)" }}
-                    allowFullScreen=""
+                    allowFullScreen
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                     title={branch.name}

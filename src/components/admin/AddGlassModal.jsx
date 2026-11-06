@@ -47,12 +47,11 @@ export default function AddGlassModal({ glass, onClose, onSaved }) {
     
     try {
       setUploading(true);
-      toast.info(`Uploading ${file.name}...`);
+
       const url = await uploadImage(file, 'glass');
       set("image", url);
       toast.success("Image uploaded!");
     } catch (error) {
-      console.error('[Glass Upload] Error:', error);
       toast.error("Upload failed: " + (error.message || "Unknown error"));
     } finally {
       setUploading(false);
@@ -70,20 +69,25 @@ export default function AddGlassModal({ glass, onClose, onSaved }) {
       };
       return isEdit ? base44.entities.GlassType.update(glass.id, data) : base44.entities.GlassType.create(data);
     },
-    onSuccess: () => { toast.success(isEdit ? "Glass type updated!" : "Glass type added!"); onSaved(); },
+    onSuccess: () => { toast.success(isEdit ? "Glass type updated" : "Glass type added"); onSaved(); },
+    onError: (err) => toast.error("Save failed: " + (err.message || "Unknown error")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: () => base44.entities.GlassType.delete(glass.id),
-    onSuccess: () => { toast.success("Deleted."); onSaved(); },
+    onSuccess: () => { toast.success("Glass type deleted"); onSaved(); },
+    onError: (err) => toast.error("Delete failed: " + (err.message || "Unknown error")),
   });
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl max-h-[95vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="font-playfair font-bold text-xl">{isEdit ? "Edit Glass Type" : "Add Glass Type"}</h2>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-muted"><X className="w-5 h-5" /></button>
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div role="dialog" aria-modal="true" className="bg-white rounded-lg shadow-2xl w-full max-w-xl max-h-[95vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-black/10">
+          <h2 className="font-semibold text-lg text-obsidian">{isEdit ? "Edit glass type" : "Add glass type"}</h2>
+          <button onClick={onClose} aria-label="Close" className="p-2 rounded-md hover:bg-muted"><X className="w-5 h-5" /></button>
         </div>
 
         <div className="p-6 space-y-4">

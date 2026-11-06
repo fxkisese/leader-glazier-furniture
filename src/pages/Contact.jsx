@@ -20,7 +20,7 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-[#f8f5ff] to-white border-b border-border">
+      <div className="bg-gradient-to-br from-[#F3EBDF] to-white border-b border-border">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
           <p className="text-gold text-sm font-medium uppercase tracking-widest mb-2">Get In Touch</p>
           <h1 className="font-playfair text-3xl lg:text-4xl font-bold text-foreground">Contact Us</h1>

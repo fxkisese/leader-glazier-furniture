@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/toaster"
+import { Toaster as SonnerToaster } from "@/components/ui/sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -18,6 +19,7 @@ import Gallery from './pages/Gallery';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import AdminDashboard from './pages/AdminDashboard';
+import { FEATURES } from '@/lib/features';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -45,13 +47,13 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<Home />} />
         <Route path="/catalogue" element={<Catalogue />} />
         <Route path="/glass" element={<GlassWorks />} />
-        <Route path="/quote-calculator" element={<QuoteCalculator />} />
+        {FEATURES.glassQuote && <Route path="/quote-calculator" element={<QuoteCalculator />} />}
         <Route path="/custom-orders" element={<CustomOrders />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/admin" element={<AdminDashboard />} />
       </Route>
+      <Route path="/admin" element={<AdminDashboard />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
@@ -66,6 +68,7 @@ function App() {
             <AuthenticatedApp />
           </Router>
           <Toaster />
+          <SonnerToaster theme="light" position="top-right" richColors closeButton />
         </QueryClientProvider>
       </CartProvider>
     </AuthProvider>

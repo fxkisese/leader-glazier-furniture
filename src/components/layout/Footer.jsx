@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Phone, MessageCircle, MapPin, Mail, Facebook, Instagram, Twitter } from "lucide-react";
+import { FEATURES } from "@/lib/features";
 
 const WHATSAPP = "254110767199";
 
@@ -45,7 +46,7 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-            <Link to="/quote-calculator" className="inline-block text-gold text-sm font-medium hover:underline">→ Get Glass Quote</Link>
+            {FEATURES.glassQuote && <Link to="/quote-calculator" className="inline-block text-gold text-sm font-medium hover:underline">→ Get Glass Quote</Link>}
           </div>
 
           {/* Contact */}

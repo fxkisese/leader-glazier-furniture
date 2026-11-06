@@ -19,7 +19,7 @@ export default function SocialFeedSection() {
   }, []);
 
   return (
-    <section className="py-16 lg:py-24 bg-white overflow-hidden">
+    <section className="py-16 lg:py-24 bg-beige overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12 lg:mb-16">
           <p className="text-gold font-inter font-medium tracking-widest uppercase mb-3">

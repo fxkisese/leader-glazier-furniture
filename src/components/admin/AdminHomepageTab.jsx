@@ -4,14 +4,16 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ArrowUp, ArrowDown, Save, EyeOff } from "lucide-react";
+import { Save, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { PageHeader, ErrorState } from "./adminShared";
+import AdminHeroMedia from "./AdminHeroMedia";
 
 export default function AdminHomepageTab() {
   const queryClient = useQueryClient();
   const [localOrder, setLocalOrder] = useState({});
 
-  const { data: featuredProducts = [], isLoading } = useQuery({
+  const { data: featuredProducts = [], isLoading, error, refetch } = useQuery({
     queryKey: ["products", "featured-admin"],
     queryFn: () => base44.entities.Product.filter({ is_featured: true }, "homepage_order"),
   });
@@ -35,8 +37,9 @@ export default function AdminHomepageTab() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast.success("Homepage arrangement saved successfully!");
+      toast.success("Homepage order saved");
     },
+    onError: (err) => toast.error(`Couldn't save: ${err.message}`),
   });
 
   const removeFeatured = useMutation({
@@ -45,6 +48,7 @@ export default function AdminHomepageTab() {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Removed from homepage");
     },
+    onError: (err) => toast.error(`Couldn't update: ${err.message}`),
   });
 
   const handleSaveAll = () => {
@@ -60,27 +64,27 @@ export default function AdminHomepageTab() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-2xl border border-border p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div>
-            <h2 className="font-semibold text-foreground text-lg">Homepage Arrangement</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Products marked as "Featured" appear here. Set their order (lower numbers appear first).
-              The top 4 products will be used in the Hero Section images.
-            </p>
-          </div>
-          <Button 
-            onClick={handleSaveAll} 
-            disabled={updateOrder.isPending}
-            className="bg-primary text-white gap-2"
+    <div>
+      <PageHeader
+        title="Homepage"
+        description="Set the photos and videos in the big hero slideshow, and the order of featured products. Featured products only fill the hero when no hero media is added."
+        actions={
+          <Button
+            onClick={handleSaveAll}
+            disabled={updateOrder.isPending || featuredProducts.length === 0}
+            className="bg-obsidian hover:bg-obsidian/90 text-white gap-2"
           >
-            <Save className="w-4 h-4" /> 
-            {updateOrder.isPending ? "Saving..." : "Save Arrangement"}
+            <Save className="w-4 h-4" />
+            {updateOrder.isPending ? "Saving…" : "Save order"}
           </Button>
-        </div>
-
-        {isLoading ? (
+        }
+      />
+      <AdminHeroMedia />
+      <h2 className="font-semibold text-obsidian mb-3">Featured products</h2>
+      <div className="bg-white rounded-lg border border-black/10 p-2 sm:p-4">
+        {error ? (
+          <ErrorState error={error} onRetry={refetch} />
+        ) : isLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="h-16 bg-muted animate-pulse rounded-xl" />
@@ -89,7 +93,7 @@ export default function AdminHomepageTab() {
         ) : featuredProducts.length === 0 ? (
           <div className="text-center py-12 border border-dashed border-border rounded-xl">
             <p className="text-muted-foreground font-medium mb-1">No featured products found.</p>
-            <p className="text-sm text-muted-foreground/70">Go to the Furniture tab and edit a product to set it as "Featured".</p>
+            <p className="text-sm text-muted-foreground/70">Open a product under Products and tick “Feature on homepage”.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">

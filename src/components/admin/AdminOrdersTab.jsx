@@ -1,5 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
+import { PageHeader, ErrorState } from "./adminShared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -12,12 +15,10 @@ import {
   MapPin,
   CreditCard,
   Smartphone,
-  Eye,
   Loader2,
   Package,
   CheckCircle2,
   Clock,
-  Truck,
   XCircle,
   AlertCircle,
 } from "lucide-react";
@@ -42,34 +43,26 @@ const ORDER_STATUS_COLORS = {
 const ORDER_STATUS_FLOW = ["new", "confirmed", "processing", "shipped", "delivered"];
 
 export default function AdminOrdersTab() {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState(null);
   const [updating, setUpdating] = useState(null);
 
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const data = await base44.entities.Order.list("-created_at", 200);
-      setOrders(data);
-    } catch (err) {
-      console.error("Failed to fetch orders:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchOrders(); }, []);
+  const { data: orders = [], isLoading: loading, isFetching, error, refetch } = useQuery({
+    queryKey: ["orders"],
+    queryFn: () => base44.entities.Order.list("-created_at", 200),
+  });
 
   const updateOrderStatus = async (orderId, newStatus) => {
+    if (newStatus === "cancelled" && !confirm("Cancel this order?")) return;
     setUpdating(orderId);
     try {
       await base44.entities.Order.update(orderId, { order_status: newStatus });
-      setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, order_status: newStatus } : o)));
+      await queryClient.invalidateQueries({ queryKey: ["orders"] });
+      toast.success(`Order marked ${ORDER_STATUS_COLORS[newStatus]?.label.toLowerCase() || newStatus}`);
     } catch (err) {
-      console.error("Failed to update order:", err);
+      toast.error(`Couldn't update order: ${err.message}`);
     } finally {
       setUpdating(null);
     }
@@ -106,6 +99,8 @@ export default function AdminOrdersTab() {
 
   return (
     <div className="space-y-6">
+      <PageHeader title="Orders" description="Online orders paid by M-Pesa or card. Click an order to see details and update its progress." />
+
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
@@ -157,8 +152,8 @@ export default function AdminOrdersTab() {
               className="pl-10 h-10 rounded-xl border-gray-200"
             />
           </div>
-          <Button variant="outline" size="sm" onClick={fetchOrders} className="h-10 rounded-xl border-gray-200" disabled={loading}>
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          <Button variant="outline" size="sm" onClick={() => refetch()} aria-label="Refresh orders" className="h-10 rounded-xl border-gray-200" disabled={isFetching}>
+            <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
           </Button>
         </div>
       </div>
@@ -167,6 +162,10 @@ export default function AdminOrdersTab() {
       {loading ? (
         <div className="flex items-center justify-center py-16">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      ) : error ? (
+        <div className="bg-white rounded-2xl border border-gray-100">
+          <ErrorState error={error} onRetry={refetch} />
         </div>
       ) : filteredOrders.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">

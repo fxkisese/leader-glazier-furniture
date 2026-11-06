@@ -1,31 +1,32 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Phone, MessageCircle, Facebook, Instagram, Twitter, ShoppingCart } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Menu, X, MessageCircle, Facebook, Instagram, ShoppingCart, Search } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
+import { FEATURES } from "@/lib/features";
 
 const WHATSAPP = "254110767199";
 
-const navLinks = [
-  { label: "Home", path: "/" },
-  { label: "Furniture", path: "/catalogue" },
-  { label: "Glass & Mirrors", path: "/glass" },
-  { label: "Glass Quote", path: "/quote-calculator" },
-  { label: "Custom Orders", path: "/custom-orders" },
-  { label: "Gallery", path: "/gallery" },
-  { label: "About", path: "/about" },
-  { label: "Contact", path: "/contact" },
+const allNavLinks = [
+  { label: "Home",           path: "/" },
+  { label: "Furniture",      path: "/catalogue" },
+  { label: "Glass & Mirrors",path: "/glass" },
+  { label: "Glass Quote",    path: "/quote-calculator" },
+  { label: "Custom Orders",  path: "/custom-orders" },
+  { label: "Gallery",        path: "/gallery" },
+  { label: "About",          path: "/about" },
+  { label: "Contact",        path: "/contact" },
 ];
+const navLinks = allNavLinks.filter((l) => FEATURES.glassQuote || l.path !== "/quote-calculator");
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen]       = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const location = useLocation();
+  const location              = useLocation();
   const { getCartCount, setIsCartOpen } = useCart();
   const cartCount = getCartCount();
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
+    const handler = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", handler);
     return () => window.removeEventListener("scroll", handler);
   }, []);
@@ -33,88 +34,186 @@ export default function Navbar() {
   useEffect(() => { setOpen(false); }, [location.pathname]);
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-md shadow-md shadow-primary/5" : "bg-white/80 backdrop-blur-sm"}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-18">
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500
+        ${scrolled
+          ? "bg-obsidian/95 backdrop-blur-md shadow-2xl shadow-black/30"
+          : "bg-obsidian"
+        }`}
+    >
+      {/* ── Top bar ───────────────────────────────────── */}
+      <div className="max-w-[1600px] mx-auto px-6 lg:px-10">
+        <div className="flex items-center justify-between h-16 lg:h-[72px]">
+
           {/* Logo */}
-          <Link to="/" className="flex flex-col leading-tight">
-            <span className="font-playfair font-bold text-primary text-lg lg:text-xl tracking-tight">Craftsman Galore</span>
-            <span className="text-xs text-gold font-inter font-medium tracking-widest uppercase">& Furniture</span>
+          <Link to="/" className="flex flex-col leading-tight shrink-0">
+            <span
+              className="font-heading font-semibold text-silk text-xl lg:text-2xl tracking-tight leading-none"
+              style={{ letterSpacing: "-0.01em" }}
+            >
+              Craftsman Galore
+            </span>
+            <span className="text-[10px] text-gold font-body font-semibold uppercase tracking-[0.28em]">
+              & Furniture
+            </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-1">
+          {/* Desktop nav */}
+          <nav className="hidden xl:flex items-center gap-0.5">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:text-primary hover:bg-accent/60 ${location.pathname === link.path ? "text-primary bg-accent/60" : "text-foreground/70"}`}
+                className={`relative px-3.5 py-2 text-[12px] font-body font-semibold uppercase tracking-[0.12em]
+                  transition-colors duration-200
+                  ${location.pathname === link.path
+                    ? "text-gold"
+                    : "text-silk/70 hover:text-silk"
+                  }`}
               >
                 {link.label}
+                {location.pathname === link.path && (
+                  <span className="absolute bottom-0 left-3.5 right-3.5 h-px bg-gold" />
+                )}
               </Link>
             ))}
           </nav>
 
-          {/* CTA */}
-          <div className="hidden lg:flex items-center gap-3">
-            <div className="flex items-center gap-3 mr-2 border-r border-border pr-4">
-              <a href="https://www.facebook.com/share/1HT1RuZTg7/" aria-label="Facebook" className="text-foreground/50 hover:text-primary transition-colors"><Facebook className="w-4 h-4" /></a>
-              <a href="https://www.instagram.com/craftsman_galore/" aria-label="Instagram" className="text-foreground/50 hover:text-primary transition-colors"><Instagram className="w-4 h-4" /></a>
+          {/* Right actions */}
+          <div className="hidden xl:flex items-center gap-2">
+            {/* Socials */}
+            <div className="flex items-center gap-1 mr-1 pr-4 border-r border-silk/10">
+              <a
+                href="https://www.facebook.com/share/1HT1RuZTg7/"
+                aria-label="Facebook"
+                className="p-2 text-silk/40 hover:text-silk transition-colors"
+              >
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a
+                href="https://www.instagram.com/craftsman_galore/"
+                aria-label="Instagram"
+                className="p-2 text-silk/40 hover:text-silk transition-colors"
+              >
+                <Instagram className="w-4 h-4" />
+              </a>
             </div>
-            <button 
+
+            {/* Cart */}
+            <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2 rounded-full hover:bg-accent/60 transition-colors text-foreground/70 hover:text-primary"
+              className="relative p-2 text-silk/50 hover:text-silk transition-colors"
+              aria-label="Cart"
             >
               <ShoppingCart className="w-5 h-5" />
               {cartCount > 0 && (
-                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white bg-primary rounded-full transform translate-x-1/4 -translate-y-1/4">
+                <span
+                  className="absolute top-1 right-1 w-4 h-4 flex items-center justify-center
+                    text-[9px] font-bold bg-gold text-obsidian rounded-full"
+                >
                   {cartCount}
                 </span>
               )}
             </button>
-            <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer">
-              <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-2 rounded-full">
-                <MessageCircle className="w-4 h-4" /> WhatsApp
-              </Button>
+
+            {/* WhatsApp CTA */}
+            <a
+              href={`https://wa.me/${WHATSAPP}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-2 inline-flex items-center gap-2 h-9 px-5
+                bg-[#25D366] hover:bg-[#1ebe5d] text-white
+                text-[11px] font-bold uppercase tracking-[0.14em]
+                transition-colors duration-200"
+            >
+              <MessageCircle className="w-4 h-4" />
+              WhatsApp
             </a>
           </div>
 
           {/* Mobile toggle */}
-          <button onClick={() => setOpen(!open)} className="lg:hidden p-2 rounded-lg hover:bg-accent transition-colors">
-            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="xl:hidden flex items-center gap-2">
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="relative p-2 text-silk/50 hover:text-silk transition-colors"
+              aria-label="Cart"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 flex items-center justify-center text-[9px] font-bold bg-gold text-obsidian rounded-full">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setOpen(!open)}
+              className="p-2 text-silk/70 hover:text-silk transition-colors"
+              aria-label="Menu"
+            >
+              {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* ── Category strip (desktop) ───────────────────── */}
+      <div className="hidden xl:block border-t border-silk/10">
+        <div className="max-w-[1600px] mx-auto px-10">
+          <div className="flex items-center gap-8 h-10 overflow-x-auto scrollbar-none">
+            {["Sofas", "Wardrobes", "TV Stands", "Beds", "Dining Sets", "Office Furniture", "Mirror Glass", "Shower Glass", "Custom Orders"].map((cat) => (
+              <Link
+                key={cat}
+                to={cat === "Mirror Glass" || cat === "Shower Glass" ? "/glass" : cat === "Custom Orders" ? "/custom-orders" : `/catalogue?category=${cat.toLowerCase().replace(/ /g, "-")}`}
+                className="text-[11px] font-bold tracking-[0.14em] uppercase text-silk/50 hover:text-gold transition-colors whitespace-nowrap"
+              >
+                {cat}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Mobile menu ────────────────────────────────── */}
       {open && (
-        <div className="lg:hidden bg-white border-t border-border px-4 pb-4 pt-2 space-y-1">
+        <div className="xl:hidden bg-obsidian border-t border-silk/10 px-6 pb-6 pt-4 space-y-1">
           {navLinks.map((link) => (
             <Link
               key={link.path}
               to={link.path}
-              className={`block px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${location.pathname === link.path ? "text-primary bg-accent" : "text-foreground/70 hover:text-primary hover:bg-accent/50"}`}
+              className={`block px-4 py-3 text-[13px] font-semibold uppercase tracking-[0.12em] transition-colors
+                ${location.pathname === link.path
+                  ? "text-gold border-l-2 border-gold pl-3"
+                  : "text-silk/60 hover:text-silk"
+                }`}
             >
               {link.label}
             </Link>
           ))}
-          <div className="flex gap-4 pt-2 pb-2 justify-center border-b border-border/50 mb-2">
-            <a href="https://www.facebook.com/share/1HT1RuZTg7/" aria-label="Facebook" className="p-2 text-foreground/50 hover:text-primary transition-colors"><Facebook className="w-5 h-5" /></a>
-            <a href="https://www.instagram.com/craftsman_galore/" aria-label="Instagram" className="p-2 text-foreground/50 hover:text-primary transition-colors"><Instagram className="w-5 h-5" /></a>
-          </div>
-          <div className="flex gap-2 pt-2">
-            <button 
-              onClick={() => setIsCartOpen(true)}
-              className="flex-1 flex items-center justify-center gap-2 p-2 rounded-lg bg-accent/50 text-foreground/80 hover:bg-accent hover:text-primary transition-colors"
+          <div className="pt-4 flex gap-3">
+            <a
+              href="https://www.facebook.com/share/1HT1RuZTg7/"
+              aria-label="Facebook"
+              className="p-2 text-silk/40 hover:text-silk transition-colors"
             >
-              <ShoppingCart className="w-4 h-4" /> Cart ({cartCount})
-            </button>
-            <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="flex-1">
-              <Button size="sm" className="w-full bg-green-600 hover:bg-green-700 text-white gap-2">
-                <MessageCircle className="w-4 h-4" /> WhatsApp
-              </Button>
+              <Facebook className="w-5 h-5" />
+            </a>
+            <a
+              href="https://www.instagram.com/craftsman_galore/"
+              aria-label="Instagram"
+              className="p-2 text-silk/40 hover:text-silk transition-colors"
+            >
+              <Instagram className="w-5 h-5" />
             </a>
           </div>
+          <a
+            href={`https://wa.me/${WHATSAPP}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 flex items-center justify-center gap-2 py-3
+              bg-[#25D366] text-white text-[12px] font-bold uppercase tracking-[0.15em]"
+          >
+            <MessageCircle className="w-4 h-4" /> WhatsApp Us
+          </a>
         </div>
       )}
     </header>

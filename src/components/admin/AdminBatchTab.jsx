@@ -1,339 +1,344 @@
-import { useState } from "react";
-import { Upload, Loader2, CheckCircle2, XCircle, Trash2, Edit } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Upload, Loader2, CheckCircle2, XCircle, Trash2, Edit, ImagePlus, RotateCcw, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/api/supabaseClient";
+import { base44 } from "@/api/base44Client";
 import { uploadImage } from "@/api/imageUpload";
 import { toast } from "sonner";
 import AddProductModal from "./AddProductModal";
+import { PageHeader, Panel, EmptyState, PRODUCT_CATEGORIES, humanize } from "./adminShared";
 
-const CATEGORIES = [
-  "sofas",
-  "tv-stands",
-  "shoe-racks",
-  "wardrobes",
-  "beds",
-  "coffee-tables",
-  "dining-sets",
-  "office-desks",
-  "office-chairs",
-  "cabinets",
-  "chest-of-drawers",
-  "custom-furniture"
-];
+const CONCURRENCY = 3;
+const CAMERA_NAME = /^(img|dsc|dcim|pxl|photo|image|whatsapp|screenshot|signal|mvimg)|^[\d_\-\s]+$/i;
 
-export default function AdminBatchTab() {
+// "luxury-blue_velvet-sofa.jpg" -> "Luxury Blue Velvet Sofa"; camera names like IMG_2034 give ""
+function nameFromFile(fileName) {
+  const base = fileName.replace(/\.[^.]+$/, "");
+  if (CAMERA_NAME.test(base)) return "";
+  return base
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+const STATUS = {
+  queued:    { label: "Ready",        className: "bg-gray-100 text-gray-600" },
+  uploading: { label: "Uploading…",   className: "bg-sky-50 text-sky-700" },
+  saving:    { label: "Saving…",      className: "bg-amber-50 text-amber-700" },
+  completed: { label: "Saved",        className: "bg-emerald-50 text-emerald-700" },
+  failed:    { label: "Failed",       className: "bg-red-50 text-red-700" },
+};
+
+export default function AdminBatchTab({ onNavigate }) {
+  const queryClient = useQueryClient();
   const [queue, setQueue] = useState([]);
   const [processing, setProcessing] = useState(false);
   const [editProd, setEditProd] = useState(null);
+  const [dragging, setDragging] = useState(false);
+  const [settings, setSettings] = useState({ category: "sofas", price: "", publish: false });
+  const queueRef = useRef(queue);
+  queueRef.current = queue;
 
-  const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
+  // Free preview blobs when leaving the tab
+  useEffect(() => () => queueRef.current.forEach((item) => URL.revokeObjectURL(item.previewUrl)), []);
 
-    const newItems = files.map((file, i) => ({
-      id: `${Date.now()}-${i}-${Math.random().toString(36).substr(2, 5)}`,
-      fileName: file.name,
-      file,
-      previewUrl: URL.createObjectURL(file),
-      status: "queued", // 'queued' | 'uploading' | 'analyzing' | 'saving' | 'completed' | 'failed'
-      error: null,
-      productUrl: null,
-      productData: null,
-      createdProduct: null,
-    }));
+  const addFiles = (fileList) => {
+    const files = Array.from(fileList || []);
+    const images = files.filter((f) => f.type.startsWith("image/") || /\.hei[cf]$/i.test(f.name));
+    if (images.length < files.length) {
+      toast.error(`${files.length - images.length} file(s) skipped — only images can be uploaded.`);
+    }
+    if (!images.length) return;
 
-    setQueue((prev) => [...prev, ...newItems]);
-    e.target.value = "";
+    setQueue((prev) => [
+      ...prev,
+      ...images.map((file, i) => ({
+        id: `${Date.now()}-${i}-${Math.random().toString(36).slice(2, 7)}`,
+        file,
+        fileName: file.name,
+        name: nameFromFile(file.name),
+        previewUrl: URL.createObjectURL(file),
+        status: "queued",
+        error: null,
+        product: null,
+      })),
+    ]);
   };
 
-  const updateQueueItem = (id, updates) => {
-    setQueue((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, ...updates } : item))
-    );
-  };
+  const updateItem = (id, updates) =>
+    setQueue((prev) => prev.map((item) => (item.id === id ? { ...item, ...updates } : item)));
 
-  const removeItem = (id) => {
+  const removeItem = (id) =>
     setQueue((prev) => {
       const target = prev.find((item) => item.id === id);
-      if (target?.previewUrl) {
-        URL.revokeObjectURL(target.previewUrl);
-      }
+      if (target) URL.revokeObjectURL(target.previewUrl);
       return prev.filter((item) => item.id !== id);
     });
-  };
 
-  const clearCompleted = () => {
+  const clearCompleted = () =>
     setQueue((prev) => {
-      const itemsToKeep = prev.filter((item) => item.status !== "completed");
-      prev.forEach((item) => {
-        if (item.status === "completed" && item.previewUrl) {
-          URL.revokeObjectURL(item.previewUrl);
-        }
-      });
-      return itemsToKeep;
+      prev.filter((i) => i.status === "completed").forEach((i) => URL.revokeObjectURL(i.previewUrl));
+      return prev.filter((i) => i.status !== "completed");
     });
+
+  const price = parseFloat(settings.price) || 0;
+  const canPublish = price > 0;
+
+  const processItem = async (item, autoName) => {
+    updateItem(item.id, { status: "uploading", error: null });
+    try {
+      const url = await uploadImage(item.file, "products", { allowFallback: false });
+      updateItem(item.id, { status: "saving" });
+
+      const name = item.name.trim() || autoName;
+      const newProduct = await base44.entities.Product.create({
+        name,
+        category: settings.category,
+        price,
+        stock_status: "in-stock",
+        is_featured: false,
+        is_published: settings.publish && canPublish,
+        images: [url],
+      });
+
+      updateItem(item.id, { status: "completed", product: newProduct, name });
+      return true;
+    } catch (err) {
+      updateItem(item.id, { status: "failed", error: err.message || "Unknown error" });
+      return false;
+    }
   };
 
-  const startProcessing = async () => {
+  const startUpload = async () => {
+    const pending = queue.filter((i) => i.status === "queued" || i.status === "failed");
+    if (!pending.length) return;
     setProcessing(true);
-    // Process items in queue that are 'queued' or 'failed'
-    const itemsToProcess = queue.filter(
-      (item) => item.status === "queued" || item.status === "failed"
-    );
 
-    for (const item of itemsToProcess) {
-      updateQueueItem(item.id, { status: "uploading", error: null });
+    // Unnamed photos become "Sofas 1", "Sofas 2", ...
+    let unnamed = 0;
+    const jobs = pending.map((item) => [item, `${humanize(settings.category)} ${item.name.trim() ? "" : ++unnamed}`.trim()]);
 
-      let uploadedUrl = "";
-      try {
-        // 1. Upload to Supabase Storage
-        uploadedUrl = await uploadImage(item.file, "products");
-        updateQueueItem(item.id, { status: "saving", productUrl: uploadedUrl });
-
-        // Create a user-friendly product name from file name
-        // E.g. "luxury-blue-velvet-sofa.jpg" -> "Luxury Blue Velvet Sofa"
-        let baseName = item.fileName;
-        const lastDot = baseName.lastIndexOf('.');
-        if (lastDot !== -1) {
-          baseName = baseName.substring(0, lastDot);
-        }
-        const formattedName = baseName
-          .replace(/[_-]+/g, ' ')
-          .trim()
-          .split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
-
-        const displayName = formattedName || "Draft Product";
-
-        // 2. Save to Database as Draft (is_published: false)
-        const productInsertData = {
-          name: displayName,
-          category: "sofas",
-          price: 0,
-          description: null,
-          material: null,
-          dimensions: null,
-          colors: null,
-          seating_capacity: null,
-          stock_status: "in-stock",
-          is_featured: false,
-          is_published: false, // draft state
-          images: [uploadedUrl],
-          whatsapp_message: `Hello, I'm interested in the ${displayName} advertised on your site.`,
-        };
-
-        const { data: insertResult, error: insertError } = await supabase
-          .from("products")
-          .insert(productInsertData)
-          .select()
-          .single();
-
-        if (insertError) {
-          throw insertError;
-        }
-
-        updateQueueItem(item.id, { status: "completed", createdProduct: insertResult });
-        toast.success(`Uploaded & Created Draft: ${displayName}`);
-      } catch (err) {
-        console.error(`Error processing ${item.fileName}:`, err);
-        updateQueueItem(item.id, { status: "failed", error: err.message || "Unknown error" });
-        toast.error(`Error on ${item.fileName}: ${err.message || "Unknown error"}`);
+    let ok = 0;
+    let next = 0;
+    const worker = async () => {
+      while (next < jobs.length) {
+        const [item, autoName] = jobs[next++];
+        if (await processItem(item, autoName)) ok++;
       }
-    }
+    };
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, jobs.length) }, worker));
 
     setProcessing(false);
+    queryClient.invalidateQueries({ queryKey: ["products"] });
+
+    const failed = jobs.length - ok;
+    if (failed === 0) toast.success(`${ok} product${ok === 1 ? "" : "s"} created`);
+    else if (ok === 0) toast.error(`All ${failed} uploads failed. See the error under each photo.`);
+    else toast.warning(`${ok} created, ${failed} failed. Fix and retry the failed ones.`);
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Title block */}
-      <div className="bg-white rounded-3xl border border-border p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="font-playfair font-bold text-2xl text-foreground flex items-center gap-2">
-            <Upload className="text-primary w-6 h-6" /> Bulk Product Uploader
-          </h2>
-          <p className="text-muted-foreground text-sm mt-1 max-w-xl">
-            Upload multiple photos of furniture. The system uploads them sequentially and saves them as editable draft products in the database.
-          </p>
-        </div>
-      </div>
+  const counts = queue.reduce((acc, i) => ({ ...acc, [i.status]: (acc[i.status] || 0) + 1 }), {});
+  const pendingCount = (counts.queued || 0) + (counts.failed || 0);
+  const doneCount = (counts.completed || 0) + (counts.failed || 0);
+  const progress = queue.length ? Math.round(((counts.completed || 0) / queue.length) * 100) : 0;
 
-      {/* File Dropzone */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-4">
-          <label className="border-2 border-dashed border-border rounded-3xl p-10 flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary/50 transition-colors bg-white hover:bg-accent/5 min-h-[200px]">
-            <Upload className="w-10 h-10 text-muted-foreground mb-3" />
-            <span className="text-sm font-semibold text-foreground">Upload Photos</span>
-            <span className="text-xs text-muted-foreground mt-1">Select one or more furniture pictures</span>
+  return (
+    <div>
+      <PageHeader
+        title="Bulk Upload"
+        description="Add many products at once. Each photo becomes its own product. Name them now or later, then fill in details from the Products page."
+      />
+
+      <div className="grid lg:grid-cols-[320px_1fr] gap-6 items-start">
+        {/* Settings + drop zone */}
+        <div className="space-y-4 lg:sticky lg:top-6">
+          <Panel className="p-5 space-y-4">
+            <p className="text-sm font-semibold text-obsidian">1. Batch settings</p>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Category for all photos</label>
+              <select
+                value={settings.category}
+                onChange={(e) => setSettings((s) => ({ ...s, category: e.target.value }))}
+                disabled={processing}
+                className="flex h-9 w-full rounded-md border border-input bg-white px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                {PRODUCT_CATEGORIES.map((c) => <option key={c} value={c}>{humanize(c)}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Price (KSh) — optional</label>
+              <Input
+                type="number"
+                min="0"
+                placeholder="Set later"
+                value={settings.price}
+                onChange={(e) => setSettings((s) => ({ ...s, price: e.target.value }))}
+                disabled={processing}
+              />
+            </div>
+            <label className={`flex items-start gap-2.5 text-sm select-none ${canPublish ? "cursor-pointer" : "opacity-50"}`}>
+              <input
+                type="checkbox"
+                className="mt-0.5 w-4 h-4 accent-obsidian"
+                checked={settings.publish && canPublish}
+                disabled={!canPublish || processing}
+                onChange={(e) => setSettings((s) => ({ ...s, publish: e.target.checked }))}
+              />
+              <span>
+                Publish immediately
+                <span className="block text-xs text-muted-foreground">
+                  {canPublish ? "Products go live on the website right away." : "Set a price to enable. Otherwise products are saved as hidden drafts."}
+                </span>
+              </span>
+            </label>
+          </Panel>
+
+          <label
+            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => { e.preventDefault(); setDragging(false); if (!processing) addFiles(e.dataTransfer.files); }}
+            className={`flex flex-col items-center justify-center text-center rounded-lg border-2 border-dashed p-8 min-h-[180px] transition-colors
+              ${processing ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+              ${dragging ? "border-gold bg-gold/5" : "border-black/15 bg-white hover:border-obsidian/40"}`}
+          >
+            <ImagePlus className="w-9 h-9 text-muted-foreground mb-3" />
+            <span className="text-sm font-semibold text-obsidian">2. Drop photos here</span>
+            <span className="text-xs text-muted-foreground mt-1">or click to choose · JPG, PNG, WebP</span>
             <input
               type="file"
               multiple
               accept="image/*"
-              onChange={handleFileSelect}
               className="hidden"
               disabled={processing}
+              onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }}
             />
           </label>
 
-          {queue.length > 0 && (
-            <div className="flex gap-2">
-              <Button
-                onClick={startProcessing}
-                disabled={processing || !queue.some(q => q.status === "queued" || q.status === "failed")}
-                className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl text-xs gap-1.5 h-10 shadow-sm"
-              >
-                {processing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Processing Batch...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4" /> Start Batch Upload
-                  </>
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                disabled={processing}
-                onClick={clearCompleted}
-                className="border-border rounded-xl text-xs h-10 text-muted-foreground hover:text-foreground"
-              >
-                Clear Done
-              </Button>
-            </div>
-          )}
+          <Button
+            onClick={startUpload}
+            disabled={processing || pendingCount === 0}
+            className="w-full h-11 bg-obsidian hover:bg-obsidian/90 text-white gap-2"
+          >
+            {processing ? (
+              <><Loader2 className="w-4 h-4 animate-spin" /> Uploading {doneCount} of {queue.length}…</>
+            ) : counts.failed && !counts.queued ? (
+              <><RotateCcw className="w-4 h-4" /> Retry {counts.failed} failed</>
+            ) : (
+              <><Upload className="w-4 h-4" /> 3. Upload {pendingCount || ""} photo{pendingCount === 1 ? "" : "s"}</>
+            )}
+          </Button>
         </div>
- 
-        {/* Queue Items */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-3xl border border-border overflow-hidden shadow-sm">
-            <div className="p-5 border-b border-border flex items-center justify-between">
-              <h3 className="font-semibold text-foreground">Queue Items ({queue.length})</h3>
-              {processing && (
-                <Badge className="bg-primary/10 text-primary hover:bg-primary/10 rounded-full text-[10px] py-1 border border-primary/20 animate-pulse">
-                  Background Upload Active
-                </Badge>
+
+        {/* Queue */}
+        <Panel className="overflow-hidden">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-black/10">
+            <div>
+              <p className="font-semibold text-obsidian text-sm">Photos ({queue.length})</p>
+              {queue.length > 0 && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {counts.completed || 0} saved{counts.failed ? ` · ${counts.failed} failed` : ""}{counts.queued ? ` · ${counts.queued} ready` : ""}
+                </p>
               )}
             </div>
- 
-            <div className="divide-y divide-border max-h-[550px] overflow-y-auto min-h-[200px]">
-              {queue.length === 0 ? (
-                <div className="flex flex-col items-center justify-center text-center py-20 text-muted-foreground">
-                  <span className="text-4xl block mb-2">🛋️</span>
-                  <p className="font-medium text-sm">No items in the queue</p>
-                  <p className="text-xs mt-0.5">Upload photos on the left to start batching.</p>
-                </div>
-              ) : (
-                queue.map((item) => (
-                  <div key={item.id} className="p-4 flex items-center justify-between gap-4 hover:bg-muted/5 transition-colors">
-                    <div className="flex items-center gap-3 min-w-0">
-                      {item.previewUrl && (
-                        <img
-                          src={item.previewUrl}
-                          alt=""
-                          className="w-12 h-12 rounded-xl object-cover border border-border"
-                        />
-                      )}
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm text-foreground truncate max-w-[200px] sm:max-w-[350px]">
-                          {item.fileName}
-                        </p>
-                        {item.status === "completed" && item.createdProduct && (
-                          <p className="text-xs text-primary font-medium truncate max-w-[200px] sm:max-w-[350px]">
-                            Created: {item.createdProduct.name}
-                          </p>
-                        )}
-                        {item.status === "failed" && (
-                          <p className="text-xs text-destructive truncate max-w-[200px] sm:max-w-[350px]">
-                            Error: {item.error}
-                          </p>
-                        )}
-                      </div>
-                    </div>
- 
-                    <div className="flex items-center gap-3 shrink-0">
-                      {/* Status Badges */}
-                      {item.status === "queued" && (
-                        <Badge variant="secondary" className="bg-muted text-muted-foreground font-normal rounded-xl">Queued</Badge>
-                      )}
-                      {item.status === "uploading" && (
-                        <Badge className="bg-blue-50 text-blue-600 border border-blue-200 font-normal rounded-xl gap-1">
-                          <Loader2 className="w-3 h-3 animate-spin" /> Uploading...
-                        </Badge>
-                      )}
-                      {item.status === "saving" && (
-                        <Badge className="bg-amber-50 text-amber-600 border border-amber-200 font-normal rounded-xl gap-1">
-                          <Loader2 className="w-3 h-3 animate-spin" /> Saving...
-                        </Badge>
-                      )}
-                      {item.status === "completed" && (
-                        <Badge className="bg-green-50 text-green-700 border border-green-200 font-normal rounded-xl gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-green-600" /> Done
-                        </Badge>
-                      )}
-                      {item.status === "failed" && (
-                        <Badge className="bg-red-50 text-red-600 border border-red-200 font-normal rounded-xl gap-1">
-                          <XCircle className="w-3.5 h-3.5 text-red-500" /> Failed
-                        </Badge>
-                      )}
-
-                      {/* Action buttons */}
-                      <div className="flex gap-1">
-                        {item.status === "completed" && item.createdProduct && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditProd(item.createdProduct)}
-                            className="border-primary/20 text-primary hover:bg-primary hover:text-white rounded-xl h-8 text-xs gap-1"
-                          >
-                            <Edit className="w-3.5 h-3.5" /> Edit Draft
-                          </Button>
-                        )}
-                        {!processing && (item.status === "queued" || item.status === "failed" || item.status === "completed") && (
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => removeItem(item.id)}
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))
+            <div className="flex gap-2">
+              {counts.completed > 0 && !processing && (
+                <>
+                  <Button variant="outline" size="sm" onClick={clearCompleted}>Clear saved</Button>
+                  {onNavigate && (
+                    <Button size="sm" className="bg-obsidian text-white gap-1.5" onClick={() => onNavigate("products")}>
+                      Review products <ArrowRight className="w-3.5 h-3.5" />
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           </div>
-        </div>
+
+          {queue.length > 0 && (
+            <div className="h-1 bg-muted">
+              <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${progress}%` }} />
+            </div>
+          )}
+
+          {queue.length === 0 ? (
+            <EmptyState
+              icon={ImagePlus}
+              title="No photos yet"
+              description="Choose a category, then drop your product photos on the left. Tip: name files like “grey-l-shaped-sofa.jpg” and the product names fill in automatically."
+            />
+          ) : (
+            <ul className="divide-y divide-black/5 max-h-[640px] overflow-y-auto">
+              {queue.map((item) => {
+                const st = STATUS[item.status];
+                const editable = !processing && (item.status === "queued" || item.status === "failed");
+                return (
+                  <li key={item.id} className="flex items-center gap-4 px-5 py-3">
+                    <img src={item.previewUrl} alt="" className="w-14 h-14 rounded-md object-cover border border-black/10 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      {editable ? (
+                        <Input
+                          value={item.name}
+                          onChange={(e) => updateItem(item.id, { name: e.target.value })}
+                          placeholder={`Product name (default: ${humanize(settings.category)} …)`}
+                          className="h-8 text-sm"
+                        />
+                      ) : (
+                        <p className="text-sm font-medium text-obsidian truncate">{item.name || item.fileName}</p>
+                      )}
+                      <p className={`text-xs mt-1 truncate ${item.status === "failed" ? "text-red-600" : "text-muted-foreground"}`}>
+                        {item.status === "failed" ? item.error : item.fileName}
+                      </p>
+                    </div>
+                    <span className={`hidden sm:inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium shrink-0 ${st.className}`}>
+                      {(item.status === "uploading" || item.status === "saving") && <Loader2 className="w-3 h-3 animate-spin" />}
+                      {item.status === "completed" && <CheckCircle2 className="w-3 h-3" />}
+                      {item.status === "failed" && <XCircle className="w-3 h-3" />}
+                      {st.label}
+                    </span>
+                    <div className="flex gap-1 shrink-0">
+                      {item.status === "completed" && item.product && (
+                        <Button size="sm" variant="outline" className="h-8 gap-1" onClick={() => setEditProd(item.product)}>
+                          <Edit className="w-3.5 h-3.5" /> Edit
+                        </Button>
+                      )}
+                      {!processing && item.status !== "uploading" && item.status !== "saving" && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          aria-label="Remove from list"
+                          onClick={() => removeItem(item.id)}
+                          className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </Panel>
       </div>
 
-      {/* Edit Modal Popup */}
       {editProd && (
         <AddProductModal
           product={editProd}
           onClose={() => setEditProd(null)}
-          onSaved={() => {
-            toast.success("Draft updated successfully!");
-            // Update queue item createdProduct state if it matches the edited product
-            setQueue((prev) =>
-              prev.map((item) => {
-                if (item.createdProduct && item.createdProduct.id === editProd.id) {
-                  // We query supabase to get the fresh product state, or just let it reload.
-                  // For simplicity, we can fetch from database later or just update its reference.
-                  return {
-                    ...item,
-                    createdProduct: { ...item.createdProduct, ...editProd } // mock update
-                  };
-                }
-                return item;
-              })
-            );
+          onSaved={async () => {
+            const editedId = editProd._id ?? editProd.id;
             setEditProd(null);
+            queryClient.invalidateQueries({ queryKey: ["products"] });
+            // Fetch fresh list and find the updated product
+            const all = await base44.entities.Product.list();
+            const updated = all.find((p) => (p._id ?? p.id) === editedId);
+            setQueue((prev) =>
+              updated
+                ? prev.map((i) => ((i.product?._id ?? i.product?.id) === editedId ? { ...i, product: updated, name: updated.name } : i))
+                : prev.filter((i) => (i.product?._id ?? i.product?.id) !== editedId)
+            );
           }}
         />
       )}

@@ -1,8 +1,11 @@
-import { supabase } from './supabaseClient';
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "../../convex/_generated/api";
+
+const client = new ConvexHttpClient(import.meta.env.VITE_CONVEX_URL || "");
 
 /**
  * Compress an image file client-side.
- * Returns a Blob (JPEG, quality 0.7, max 1200px wide).
+ * Returns a JPEG Blob whose longest side is at most maxWidth.
  */
 function compressImage(file, maxWidth = 1200, quality = 0.7) {
   return new Promise((resolve, reject) => {
@@ -13,10 +16,10 @@ function compressImage(file, maxWidth = 1200, quality = 0.7) {
         const canvas = document.createElement('canvas');
         let w = img.width;
         let h = img.height;
-        if (w > maxWidth) {
-          h = Math.round((h * maxWidth) / w);
-          w = maxWidth;
-        }
+        // Limit the longest side so portrait photos shrink too
+        const scale = Math.min(1, maxWidth / Math.max(w, h));
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
         canvas.width = w;
         canvas.height = h;
         const ctx = canvas.getContext('2d');
@@ -48,37 +51,80 @@ function toBase64(blob) {
 }
 
 /**
- * Upload an image file. Tries Supabase Storage first; if that fails,
- * compresses the image and returns a base64 data URL instead.
- * 
- * GUARANTEED to return a usable image URL.
+ * iPhone photos are often HEIC even when named .jpg, and most browsers can't display them.
+ * Check the file's own header bytes, not just its name.
  */
-export async function uploadImage(file, folder = 'uploads') {
+async function isHeic(file) {
+  if (/hei[cf]$/i.test(file.type) || /\.hei[cf]$/i.test(file.name)) return true;
+  const head = new Uint8Array(await file.slice(4, 12).arrayBuffer());
+  return /^ftyp(heic|heix|hevc|hevx|mif1|msf1)/.test(String.fromCharCode(...head));
+}
+
+async function heicToJpeg(file) {
+  const { default: heic2any } = await import('heic2any');
+  const out = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 });
+  const name = file.name.replace(/\.\w+$/, '') + '.jpg';
+  return new File([Array.isArray(out) ? out[0] : out], name, { type: 'image/jpeg' });
+}
+
+/**
+ * Upload an image file to Convex Storage.
+ * Large photos are resized to max 1600px JPEG first.
+ * Falls back to base64 data URL if Convex upload fails.
+ *
+ * @param {File} file
+ * @param {string} [_folder] - ignored (Convex uses storageIds), kept for API compat
+ * @param {{ allowFallback?: boolean, maxWidth?: number }} [opts]
+ * @returns {Promise<string>} public URL or base64 data URL
+ */
+export async function uploadImage(file, _folder = 'uploads', { allowFallback = true, maxWidth = 1600 } = {}) {
   if (!file) throw new Error('No file provided');
 
-  const ext = file.name.split('.').pop();
-  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-  const filePath = `${folder}/${fileName}`;
+  if (await isHeic(file)) {
+    try {
+      file = await heicToJpeg(file);
+    } catch {
+      throw new Error(`${file.name} is an iPhone (HEIC) photo that couldn't be converted. Export it as JPEG and try again.`);
+    }
+  }
 
-  // --- Attempt 1: Supabase Storage ---
+  // Shrink phone photos (often 5–10 MB) for faster uploads & page loads
+  let body = file;
+  let contentType = file.type || 'image/jpeg';
+
+  if (file.type !== 'image/gif' && file.type !== 'image/svg+xml') {
+    try {
+      body = await compressImage(file, maxWidth, 0.82);
+      contentType = 'image/jpeg';
+    } catch {
+      // If the browser can't read it, visitors' browsers can't show it either — don't store it
+      throw new Error(`${file.name} isn't an image format browsers can display. Save it as JPEG or PNG and try again.`);
+    }
+  }
+
+  // --- Attempt 1: Convex Storage ---
   try {
-    console.log('[Upload] Trying Supabase Storage...', { name: file.name, size: file.size, path: filePath });
+    const uploadUrl = await client.mutation(api.fileStorage.generateUploadUrl, {});
 
-    const { error } = await supabase.storage
-      .from('craftsman-images')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: true,
-        contentType: file.type,
-      });
+    const res = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': contentType },
+      body,
+    });
 
-    if (error) throw error;
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Convex upload failed (${res.status}): ${text}`);
+    }
 
-    const { data } = supabase.storage.from('craftsman-images').getPublicUrl(filePath);
-    console.log('[Upload] Supabase Storage success:', data.publicUrl);
-    return data.publicUrl;
+    const { storageId } = await res.json();
+    const result = await client.mutation(api.fileStorage.getFileUrl, { storageId });
+    return result.file_url;
   } catch (storageError) {
-    console.warn('[Upload] Supabase Storage failed, using base64 fallback:', storageError.message);
+    if (!allowFallback) {
+      throw new Error(`Image storage upload failed: ${storageError.message}`);
+    }
+    console.warn('[Upload] Convex Storage failed, using base64 fallback:', storageError.message);
   }
 
   // --- Attempt 2: Compress + Base64 data URL ---
@@ -88,9 +134,8 @@ export async function uploadImage(file, folder = 'uploads') {
     const dataUrl = await toBase64(compressed);
     console.log('[Upload] Base64 fallback success. Size:', Math.round(dataUrl.length / 1024), 'KB');
     return dataUrl;
-  } catch (compressError) {
+  } catch {
     console.warn('[Upload] Compression failed, using raw base64...');
-    // Last resort: raw base64 without compression
     const rawDataUrl = await toBase64(file);
     console.log('[Upload] Raw base64 size:', Math.round(rawDataUrl.length / 1024), 'KB');
     return rawDataUrl;

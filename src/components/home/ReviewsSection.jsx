@@ -26,10 +26,10 @@ export default function ReviewsSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {displayReviews.slice(0, 3).map((review) => (
-            <div key={review.id} className="bg-[#f8f5ff] rounded-2xl p-6 space-y-4 border border-border hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+            <div key={review.id} className="bg-[#F3EBDF] rounded-2xl p-6 space-y-4 border border-border hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
               <div className="flex gap-1">
                 {Array.from({ length: review.rating }).map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-gold text-gold" style={{ color: "hsl(43 74% 60%)", fill: "hsl(43 74% 60%)" }} />
+                  <Star key={i} className="w-4 h-4 fill-gold text-gold" style={{ color: "#B07A45", fill: "#B07A45" }} />
                 ))}
               </div>
               <p className="text-foreground/80 text-sm leading-relaxed">"{review.comment}"</p>

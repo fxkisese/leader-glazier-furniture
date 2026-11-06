@@ -10,7 +10,7 @@ const LABEL_CONFIG = {
   "new-arrival": { label: "New Arrival", class: "bg-blue-100 text-blue-700" },
   "best-seller": { label: "Best Seller", class: "bg-gold/20 text-amber-700" },
   "limited-offer": { label: "Limited Offer", class: "bg-red-100 text-red-700" },
-  "custom-order": { label: "Custom Order", class: "bg-purple-100 text-purple-700" },
+  "custom-order": { label: "Custom Order", class: "bg-beige text-obsidian" },
 };
 
 const WHATSAPP = "254110767199";
@@ -21,7 +21,7 @@ export default function ProductCard({ product }) {
   const { addToCart } = useCart();
 
   const waMessage = product.whatsapp_message
-    || (product.images?.[0] ? product.images[0] : `Hello Craftsman Galore, I'm interested in the *${product.name}* (KSh ${product.price?.toLocaleString()}). Please share more details.`);
+    || `Hello Craftsman Galore, I'm interested in the *${product.name}* (KSh ${product.price?.toLocaleString()}). Please share more details.`;
 
   const labelConf = LABEL_CONFIG[product.label];
 

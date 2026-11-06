@@ -117,7 +117,7 @@ export default function QuoteCalculator() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-br from-[#f8f5ff] to-white border-b border-border">
+      <div className="bg-gradient-to-br from-[#F3EBDF] to-white border-b border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14 text-center">
           <p className="text-gold text-sm font-medium uppercase tracking-widest mb-2">Instant Pricing Tool</p>
           <h1 className="font-playfair text-3xl lg:text-4xl font-bold text-foreground">Glass & Mirror Quote Calculator</h1>
@@ -266,7 +266,7 @@ export default function QuoteCalculator() {
                 </div>
               </div>
             ) : (
-              <div className="bg-gradient-to-br from-[#f8f5ff] to-accent/20 rounded-2xl border border-border p-8 text-center space-y-4">
+              <div className="bg-gradient-to-br from-[#F3EBDF] to-accent/20 rounded-2xl border border-border p-8 text-center space-y-4">
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
                   <Calculator className="w-8 h-8 text-primary" />
                 </div>

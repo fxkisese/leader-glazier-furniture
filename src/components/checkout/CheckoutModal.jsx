@@ -84,7 +84,7 @@ function StripeCardForm({ product, paymentType, customerInfo, onSuccess, onError
               style: {
                 base: {
                   fontSize: "16px",
-                  color: "#1a1a2e",
+                  color: "#2B211B",
                   fontFamily: "'Inter', sans-serif",
                   "::placeholder": { color: "#94a3b8" },
                 },
@@ -110,7 +110,7 @@ function StripeCardForm({ product, paymentType, customerInfo, onSuccess, onError
         <Button
           type="submit"
           disabled={!stripe || processing}
-          className="flex-1 h-14 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold text-base shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 gap-2"
+          className="flex-1 h-14 rounded-xl bg-obsidian hover:bg-obsidian/90 text-white font-semibold text-base shadow-lg shadow-obsidian/25 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 gap-2"
         >
           {processing ? (
             <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
@@ -379,11 +379,11 @@ export default function CheckoutModal({ product, cartItems, onClose }) {
                     onClick={() => setPaymentMethod("stripe")}
                     className={`p-4 rounded-xl border-2 text-center transition-all ${
                       paymentMethod === "stripe"
-                        ? "border-indigo-500 bg-indigo-50 shadow-md shadow-indigo-500/10"
+                        ? "border-gold bg-beige/60 shadow-md shadow-gold/10"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 mx-auto mb-2 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-obsidian mx-auto mb-2 flex items-center justify-center">
                       <CreditCard className="w-5 h-5 text-white" />
                     </div>
                     <p className="font-semibold text-sm text-gray-900">Card</p>

@@ -1,89 +1,112 @@
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Phone, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import { PageHeader, Panel, EmptyState, ErrorState, ListSkeleton, FilterChips, Pill, formatKsh, formatDate, humanize } from "./adminShared";
 
-const WHATSAPP = "254110767199";
-
-const STATUS_COLORS = {
-  new: "bg-amber-50 text-amber-700",
-  contacted: "bg-blue-50 text-blue-700",
-  completed: "bg-green-50 text-green-700",
-  cancelled: "bg-gray-100 text-gray-500",
-};
+const STATUSES = [
+  { value: "new", tone: "amber" },
+  { value: "contacted", tone: "blue" },
+  { value: "completed", tone: "green" },
+  { value: "cancelled", tone: "gray" },
+];
+const toneOf = (s) => STATUSES.find((x) => x.value === s)?.tone || "gray";
 
 export default function AdminQuotesTab() {
   const queryClient = useQueryClient();
+  const [filter, setFilter] = useState("open");
 
-  const { data: quotes = [] } = useQuery({
+  const { data: quotes = [], isLoading, error, refetch } = useQuery({
     queryKey: ["quote-requests"],
-    queryFn: () => base44.entities.QuoteRequest.list("-created_date", 50),
+    queryFn: () => base44.entities.QuoteRequest.list("-created_date", 200),
   });
 
   const updateStatus = useMutation({
     mutationFn: ({ id, status }) => base44.entities.QuoteRequest.update(id, { status }),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["quote-requests"] }); toast.success("Status updated"); },
+    onSuccess: (q) => { queryClient.invalidateQueries({ queryKey: ["quote-requests"] }); toast.success(`Marked as ${q.status}`); },
+    onError: (err) => toast.error(`Couldn't update: ${err.message}`),
   });
 
+  const isOpen = (q) => q.status === "new" || q.status === "contacted";
+  const filtered = quotes.filter((q) => (filter === "all" ? true : filter === "open" ? isOpen(q) : q.status === filter));
+
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="font-semibold text-foreground">Quote Requests ({quotes.length})</h2>
-        <Badge className="bg-primary/10 text-primary">{quotes.filter((q) => q.status === "new").length} new</Badge>
+    <div>
+      <PageHeader title="Glass Quotes" description="Estimates customers generated with the online glass calculator. Contact them to confirm measurements." />
+
+      <div className="mb-4">
+        <FilterChips
+          value={filter}
+          onChange={setFilter}
+          options={[
+            { value: "open", label: "Open", count: quotes.filter(isOpen).length },
+            { value: "new", label: "New", count: quotes.filter((q) => q.status === "new").length },
+            { value: "completed", label: "Completed" },
+            { value: "cancelled", label: "Cancelled" },
+            { value: "all", label: "All", count: quotes.length },
+          ]}
+        />
       </div>
 
-      <div className="space-y-3">
-        {quotes.map((q) => (
-          <div key={q.id} className="bg-white rounded-2xl border border-border p-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-semibold text-foreground">{q.glass_type_name}</h3>
-                  <Badge className={STATUS_COLORS[q.status]} variant="secondary">{q.status}</Badge>
+      <Panel className="overflow-hidden">
+        {isLoading ? (
+          <ListSkeleton />
+        ) : error ? (
+          <ErrorState error={error} onRetry={refetch} />
+        ) : filtered.length === 0 ? (
+          <EmptyState icon={MessageSquare} title={quotes.length ? "Nothing here" : "No glass quotes yet"} description={quotes.length ? "No quotes match this filter." : "Quotes appear here when customers use the glass calculator."} />
+        ) : (
+          <ul className="divide-y divide-black/5">
+            {filtered.map((q) => (
+              <li key={q.id} className="p-5 flex flex-col md:flex-row md:items-center gap-4">
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-semibold text-obsidian">{q.glass_type_name}</h3>
+                    <Pill tone={toneOf(q.status)}>{humanize(q.status || "new")}</Pill>
+                    <span className="text-xs text-muted-foreground">{formatDate(q.created_at)}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {q.width} × {q.height} {q.unit} · {Number(q.area_sqft || 0).toFixed(1)} sq ft · Qty {q.quantity || 1}
+                    {q.include_installation && " · Installation"}
+                    {q.include_frame && " · Frame"}
+                    {q.include_delivery && ` · Delivery${q.delivery_location ? ` to ${q.delivery_location}` : ""}`}
+                  </p>
+                  {(q.customer_name || q.phone) && (
+                    <p className="text-sm text-obsidian">{q.customer_name}{q.customer_name && q.phone && " · "}{q.phone}</p>
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {q.width} × {q.height} {q.unit} • {q.area_sqft?.toFixed(1)} sq ft • Qty: {q.quantity}
-                </p>
-                <p className="text-sm">
-                  {q.include_installation && <span className="text-muted-foreground mr-2">✓ Installation</span>}
-                  {q.include_frame && <span className="text-muted-foreground mr-2">✓ Frame</span>}
-                  {q.include_delivery && <span className="text-muted-foreground">✓ Delivery{q.delivery_location ? ` — ${q.delivery_location}` : ""}</span>}
-                </p>
-                <p className="font-semibold text-primary text-lg">KSh {q.estimated_total?.toLocaleString()}</p>
-                {(q.customer_name || q.phone) && (
-                  <p className="text-sm text-muted-foreground">{q.customer_name} {q.phone && `• ${q.phone}`}</p>
-                )}
-              </div>
-              <div className="flex gap-2 items-center">
-                <Select value={q.status} onValueChange={(v) => updateStatus.mutate({ id: q.id, status: v })}>
-                  <SelectTrigger className="w-36 h-9 text-sm"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {["new", "contacted", "completed", "cancelled"].map((s) => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {q.phone && (
-                  <a href={`https://wa.me/${q.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Hello, regarding your glass quote for ${q.glass_type_name} — estimated KSh ${q.estimated_total?.toLocaleString()}. Let's confirm details.`)}`} target="_blank" rel="noopener noreferrer">
-                    <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white px-3 h-9">
-                      <MessageCircle className="w-4 h-4" />
-                    </Button>
-                  </a>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-        {quotes.length === 0 && (
-          <div className="text-center py-16 text-muted-foreground bg-white rounded-2xl border border-border">
-            <span className="text-4xl block mb-3">📋</span>
-            <p className="font-medium">No quote requests yet</p>
-          </div>
+                <p className="font-semibold text-obsidian md:w-32 md:text-right">{formatKsh(q.estimated_total)}</p>
+                <div className="flex gap-2 items-center">
+                  <Select value={q.status || "new"} onValueChange={(v) => updateStatus.mutate({ id: q.id, status: v })}>
+                    <SelectTrigger className="w-36 h-9 text-sm bg-white"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {STATUSES.map((s) => <SelectItem key={s.value} value={s.value}>{humanize(s.value)}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  {q.phone && (
+                    <>
+                      <a href={`tel:${q.phone}`} aria-label="Call customer">
+                        <Button size="icon" variant="outline" className="h-9 w-9"><Phone className="w-4 h-4" /></Button>
+                      </a>
+                      <a
+                        aria-label="WhatsApp customer"
+                        href={`https://wa.me/${q.phone.replace(/\D/g, "").replace(/^0/, "254")}?text=${encodeURIComponent(`Hello${q.customer_name ? ` ${q.customer_name}` : ""}, regarding your glass quote for ${q.glass_type_name} — estimated ${formatKsh(q.estimated_total)}. Let's confirm the details.`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button size="icon" className="h-9 w-9 bg-[#25D366] hover:bg-[#1ebe5d] text-white"><MessageCircle className="w-4 h-4" /></Button>
+                      </a>
+                    </>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
-      </div>
+      </Panel>
     </div>
   );
 }
