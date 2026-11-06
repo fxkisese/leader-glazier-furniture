@@ -7,6 +7,7 @@ export const ROLES = {
   hr: { label: "HR", description: "Staff records, attendance and payroll only" },
   sales: { label: "Sales", description: "Records sales, customers, website orders; can't see costs or profit" },
   workshop: { label: "Workshop", description: "Production board only" },
+  marketing: { label: "Marketing", description: "Ads, posts, leads and marketing reports only" },
 } as const;
 
 export type Role = keyof typeof ROLES;
@@ -21,14 +22,16 @@ export type Module =
   | "suppliers"
   | "production"
   | "hr" // staff, attendance, payroll
-  | "team"; // staff logins and roles
+  | "team" // staff logins and roles
+  | "marketing"; // ads, posts, leads and marketing reports
 
 export const ROLE_ACCESS: Record<Role, Module[]> = {
-  ceo: ["dashboard", "website", "sales", "costs", "inventory", "customers", "suppliers", "production", "hr", "team"],
-  manager: ["dashboard", "website", "sales", "costs", "inventory", "customers", "suppliers", "production"],
+  ceo: ["dashboard", "website", "sales", "costs", "inventory", "customers", "suppliers", "production", "hr", "team", "marketing"],
+  manager: ["dashboard", "website", "sales", "costs", "inventory", "customers", "suppliers", "production", "marketing"],
   hr: ["hr"],
   sales: ["website", "sales", "customers", "production"],
   workshop: ["production"],
+  marketing: ["marketing"],
 };
 
 export const can = (role: string | undefined | null, module: Module) =>

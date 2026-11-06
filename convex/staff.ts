@@ -82,7 +82,7 @@ export const _byUsername = internalQuery({
 export const _caller = internalQuery({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    const me = await requireAccess(ctx, token, ["dashboard", "website", "sales", "costs", "inventory", "customers", "suppliers", "production", "hr", "team"]);
+    const me = await requireAccess(ctx, token, ["dashboard", "website", "sales", "costs", "inventory", "customers", "suppliers", "production", "hr", "team", "marketing"]);
     return { id: me._id, role: me.role };
   },
 });

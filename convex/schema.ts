@@ -77,6 +77,124 @@ export const jobFields = {
   notes: v.optional(v.string()),
 };
 
+
+// Online orders paid through the website checkout (M-Pesa / card). Written by the payment backend.
+export const orderFields = {
+  product_id: v.optional(v.string()),
+  product_name: v.string(),
+  product_image: v.optional(v.string()),
+  product_price: v.optional(v.number()),
+  customer_name: v.string(),
+  customer_phone: v.string(),
+  customer_email: v.optional(v.string()),
+  delivery_address: v.optional(v.string()),
+  payment_method: v.optional(v.string()), // mpesa | stripe
+  payment_type: v.optional(v.string()), // full | deposit
+  total_amount: v.number(),
+  deposit_amount: v.optional(v.number()),
+  amount_paid: v.optional(v.number()),
+  balance_due: v.optional(v.number()),
+  mpesa_checkout_request_id: v.optional(v.string()),
+  mpesa_receipt_number: v.optional(v.string()),
+  stripe_payment_intent_id: v.optional(v.string()),
+  payment_status: v.optional(v.string()), // pending | paid | partial | failed | refunded
+  order_status: v.optional(v.string()), // new | confirmed | processing | shipped | delivered | cancelled
+  notes: v.optional(v.string()),
+};
+
+// ── Marketing: ads, posts and leads, so you can see which ad or post actually sold furniture ──
+// Dates are YYYY-MM-DD in Nairobi time; *_at fields are milliseconds.
+export const mktCampaignFields = {
+  platform: v.string(), // meta | tiktok | google | other
+  name: v.string(),
+  objective: v.optional(v.string()), // messages, traffic, awareness, sales...
+  meta_campaign_id: v.optional(v.string()), // filled by the Meta sync
+  status: v.string(), // active | paused | ended
+  start_date: v.optional(v.string()),
+  end_date: v.optional(v.string()),
+  daily_budget: v.optional(v.number()),
+  notes: v.optional(v.string()),
+};
+
+export const mktAdFields = {
+  campaign_id: v.id("mkt_campaigns"),
+  meta_ad_id: v.optional(v.string()), // filled by the Meta sync; matches WhatsApp ad referrals
+  name: v.string(),
+  creative_type: v.optional(v.string()), // video | photo | carousel | reel | status | other
+  product: v.optional(v.string()),
+  hook: v.optional(v.string()), // build process, before/after, price offer...
+};
+
+export const mktSpendFields = {
+  campaign_id: v.id("mkt_campaigns"),
+  ad_id: v.optional(v.id("mkt_ads")),
+  ad_key: v.string(), // Meta ad id for synced rows, "" for campaign-level manual rows
+  date: v.string(),
+  spend: v.number(),
+  impressions: v.optional(v.number()),
+  reach: v.optional(v.number()),
+  clicks: v.optional(v.number()),
+  messages: v.optional(v.number()), // messaging conversations started
+  source: v.string(), // manual | meta_api
+};
+
+export const mktPostFields = {
+  employee_id: v.optional(v.string()), // who posted (Staff & Payroll record)
+  platform: v.string(), // instagram | facebook | tiktok | whatsapp_status | youtube | other
+  date: v.string(),
+  time: v.optional(v.string()), // HH:MM
+  format: v.optional(v.string()),
+  product: v.optional(v.string()),
+  hook: v.optional(v.string()),
+  branch: v.optional(v.string()),
+  url: v.optional(v.string()),
+  caption: v.optional(v.string()),
+  boost_cost: v.optional(v.number()), // money spent boosting this post
+  notes: v.optional(v.string()),
+};
+
+export const mktLeadFields = {
+  name: v.optional(v.string()),
+  phone: v.optional(v.string()),
+  source_type: v.string(), // meta_ad | organic_post | whatsapp | walk_in | referral | google | website | tiktok | other
+  campaign_id: v.optional(v.id("mkt_campaigns")),
+  ad_id: v.optional(v.id("mkt_ads")),
+  post_id: v.optional(v.id("mkt_posts")),
+  meta_ad_id: v.optional(v.string()), // raw ad id from a click-to-WhatsApp referral
+  ctwa_clid: v.optional(v.string()),
+  referral_headline: v.optional(v.string()),
+  utm_source: v.optional(v.string()),
+  utm_medium: v.optional(v.string()),
+  utm_campaign: v.optional(v.string()),
+  branch: v.optional(v.string()),
+  product_interest: v.optional(v.string()),
+  status: v.string(), // new | contacted | quoted | visited | won | lost
+  lost_reason: v.optional(v.string()),
+  quoted_amount: v.optional(v.number()),
+  sale_amount: v.optional(v.number()),
+  sale_id: v.optional(v.string()), // the matching record in Sales
+  received_at: v.number(), // when the enquiry came in
+  first_response_at: v.optional(v.number()),
+  converted_at: v.optional(v.number()),
+  notes: v.optional(v.string()),
+};
+
+export const mktCheckinFields = {
+  employee_id: v.string(),
+  date: v.string(),
+  checked_meta_inbox: v.boolean(),
+  checked_website: v.boolean(),
+  replied_all: v.boolean(),
+  notes: v.optional(v.string()),
+};
+
+// Who does marketing and how many posts a day they owe. Pay comes from Staff & Payroll.
+export const mktTeamFields = {
+  employee_id: v.string(),
+  daily_post_target: v.number(),
+  active: v.boolean(),
+};
+
 export default defineSchema({
   staff_accounts: defineTable({
     name: v.string(),
@@ -316,4 +434,15 @@ export default defineSchema({
     unit_price: v.optional(v.number()),
     total_price: v.optional(v.number()),
   }),
+
+  orders: defineTable(orderFields).index("by_mpesa_checkout", ["mpesa_checkout_request_id"]),
+
+  // ── Marketing ──
+  mkt_campaigns: defineTable(mktCampaignFields).index("by_meta_id", ["meta_campaign_id"]),
+  mkt_ads: defineTable(mktAdFields).index("by_meta_id", ["meta_ad_id"]).index("by_campaign", ["campaign_id"]),
+  mkt_ad_spend: defineTable(mktSpendFields).index("by_key", ["campaign_id", "ad_key", "date"]).index("by_date", ["date"]),
+  mkt_posts: defineTable(mktPostFields).index("by_date", ["date"]),
+  mkt_leads: defineTable(mktLeadFields).index("by_received", ["received_at"]).index("by_phone", ["phone"]),
+  mkt_checkins: defineTable(mktCheckinFields).index("by_employee_date", ["employee_id", "date"]),
+  mkt_team: defineTable(mktTeamFields).index("by_employee", ["employee_id"]),
 });

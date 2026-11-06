@@ -171,6 +171,17 @@ export const businessApi = {
   removePayslip: (id) => authed((a) => client.mutation(api.hr.removePayslip, a), { id }),
 };
 
+// Marketing: reports, pickers and the Meta sync
+export const marketingApi = {
+  report: (from, to) => authed((a) => client.query(api.marketing.report, a), { from, to }),
+  employees: async () => (await authed((a) => client.query(api.marketing.employeeOptions, a))).map(normalize),
+  sales: async () => (await authed((a) => client.query(api.marketing.saleOptions, a))).map(normalize),
+  checkins: async (date) => (await authed((a) => client.query(api.marketing.listCheckins, a), { date })).map(normalize),
+  setCheckin: (employee_id, date, flags) => authed((a) => client.mutation(api.marketing.setCheckin, a), { employee_id, date, ...flags }),
+  syncMeta: (days = 3) => authed((a) => client.action(api.marketingMeta.syncNow, a), { days }),
+  status: () => authed((a) => client.action(api.marketingMeta.status, a)),
+};
+
 // ─────────────────────────────────────────────────────────
 // Entity map — mirrors the old base44.entities surface
 // ─────────────────────────────────────────────────────────
@@ -245,6 +256,14 @@ export const base44 = {
       createMutation: api.siteSettings.create,
       updateMutation: api.siteSettings.update,
       removeMutation: api.siteSettings.update, // no dedicated remove for settings
+    }),
+
+    Order: makeEntity({
+      listQuery: api.orders.list,
+      createMutation: api.orders.update, // orders are created by the payment backend, not the admin
+      updateMutation: api.orders.update,
+      removeMutation: api.orders.remove,
+      auth: true,
     }),
 
     Sale: makeEntity({
@@ -323,6 +342,49 @@ export const base44 = {
       createMutation: api.admin.createExpense,
       updateMutation: api.admin.updateExpense,
       removeMutation: api.admin.removeExpense,
+      auth: true,
+    }),
+
+    MktCampaign: makeEntity({
+      listQuery: api.marketing.listCampaigns,
+      createMutation: api.marketing.createCampaign,
+      updateMutation: api.marketing.updateCampaign,
+      removeMutation: api.marketing.removeCampaign,
+      auth: true,
+    }),
+    MktAd: makeEntity({
+      listQuery: api.marketing.listAds,
+      createMutation: api.marketing.createAd,
+      updateMutation: api.marketing.updateAd,
+      removeMutation: api.marketing.removeAd,
+      auth: true,
+    }),
+    MktSpend: makeEntity({
+      listQuery: api.marketing.listSpend,
+      createMutation: api.marketing.createSpend,
+      updateMutation: api.marketing.updateSpend,
+      removeMutation: api.marketing.removeSpend,
+      auth: true,
+    }),
+    MktPost: makeEntity({
+      listQuery: api.marketing.listPosts,
+      createMutation: api.marketing.createPost,
+      updateMutation: api.marketing.updatePost,
+      removeMutation: api.marketing.removePost,
+      auth: true,
+    }),
+    MktLead: makeEntity({
+      listQuery: api.marketing.listLeads,
+      createMutation: api.marketing.createLead,
+      updateMutation: api.marketing.updateLead,
+      removeMutation: api.marketing.removeLead,
+      auth: true,
+    }),
+    MktTeam: makeEntity({
+      listQuery: api.marketing.listTeam,
+      createMutation: api.marketing.createTeam,
+      updateMutation: api.marketing.updateTeam,
+      removeMutation: api.marketing.removeTeam,
       auth: true,
     }),
 

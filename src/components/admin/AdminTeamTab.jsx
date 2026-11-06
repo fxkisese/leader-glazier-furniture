@@ -15,7 +15,7 @@ const KEY = ["staff-accounts"];
 const MODULE_LABELS = {
   dashboard: "CEO dashboard", website: "Website & orders", sales: "Sales", costs: "Costs & profit",
   inventory: "Inventory", customers: "Customers", suppliers: "Suppliers", production: "Production",
-  hr: "Staff & payroll", team: "Logins",
+  hr: "Staff & payroll", team: "Logins", marketing: "Marketing",
 };
 
 export default function AdminTeamTab() {
@@ -77,7 +77,7 @@ export default function AdminTeamTab() {
       </Panel>
 
       <h2 className="text-sm font-semibold text-obsidian mb-3">What each role can open</h2>
-      <div className="grid sm:grid-cols-2 xl:grid-cols-5 gap-3">
+      <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
         {Object.entries(ROLES).map(([k, r]) => (
           <Panel key={k} className="p-4">
             <p className="font-medium text-obsidian flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-gold" />{r.label}</p>

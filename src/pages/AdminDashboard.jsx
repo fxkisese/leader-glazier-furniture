@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import {
   Package, Layers, MessageSquare, Star, LayoutDashboard, Lock, Sparkles, Upload, ShoppingBag,
   ExternalLink, LogOut, Menu, X, ArrowRight, Plus, AlertCircle, TrendingUp, Boxes, Wallet,
-  Gauge, Users, Truck, Hammer, IdCard, ShieldCheck, Loader2, KeyRound,
+  Gauge, Users, Truck, Hammer, IdCard, ShieldCheck, Loader2, KeyRound, Megaphone,
 } from "lucide-react";
 import AdminSalesTab from "../components/admin/AdminSalesTab";
 import AdminInventoryTab from "../components/admin/AdminInventoryTab";
@@ -28,6 +28,7 @@ import AdminCustomOrdersTab from "../components/admin/AdminCustomOrdersTab";
 import AdminBatchTab from "../components/admin/AdminBatchTab";
 import AdminOrdersTab from "../components/admin/AdminOrdersTab";
 import AdminHomepageTab from "../components/admin/AdminHomepageTab";
+import AdminMarketingTab from "../components/admin/AdminMarketingTab";
 import { PageHeader, Panel, ErrorState, Pill, formatKsh, formatDate } from "../components/admin/adminShared";
 
 // Staff sign-in. On a brand-new install (no accounts yet) it offers to create the owner/CEO account.
@@ -115,6 +116,12 @@ const NAV = [
       { id: "orders", label: "Website Orders", icon: ShoppingBag, badge: "orders", module: "website" },
       { id: "custom-orders", label: "Custom Requests", icon: Star, badge: "custom", module: "website" },
       ...(FEATURES.glassQuote ? [{ id: "quotes", label: "Glass Quotes", icon: MessageSquare, badge: "quotes", module: "website" }] : []),
+    ],
+  },
+  {
+    group: "Marketing",
+    items: [
+      { id: "marketing", label: "Marketing", icon: Megaphone, module: "marketing" },
     ],
   },
   {
@@ -302,6 +309,7 @@ function AdminShell() {
           {tab === "bulk-upload" && <AdminBatchTab onNavigate={go} />}
           {tab === "glass" && <AdminGlassTab />}
           {tab === "homepage" && <AdminHomepageTab />}
+          {tab === "marketing" && <AdminMarketingTab />}
         </main>
         {pwOpen && <PasswordModal account={account} self onClose={() => setPwOpen(false)} onDone={signOut} />}
       </div>

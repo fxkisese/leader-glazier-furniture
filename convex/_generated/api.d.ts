@@ -10,6 +10,7 @@
 
 import type * as access from "../access.js";
 import type * as admin from "../admin.js";
+import type * as crons from "../crons.js";
 import type * as customOrderRequests from "../customOrderRequests.js";
 import type * as customers from "../customers.js";
 import type * as fileStorage from "../fileStorage.js";
@@ -17,8 +18,12 @@ import type * as galleryItems from "../galleryItems.js";
 import type * as glassTypes from "../glassTypes.js";
 import type * as heroMedia from "../heroMedia.js";
 import type * as hr from "../hr.js";
+import type * as http from "../http.js";
 import type * as inventory from "../inventory.js";
+import type * as marketing from "../marketing.js";
+import type * as marketingMeta from "../marketingMeta.js";
 import type * as migrations from "../migrations.js";
+import type * as orders from "../orders.js";
 import type * as payEntries from "../payEntries.js";
 import type * as permissions from "../permissions.js";
 import type * as productionJobs from "../productionJobs.js";
@@ -40,6 +45,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   access: typeof access;
   admin: typeof admin;
+  crons: typeof crons;
   customOrderRequests: typeof customOrderRequests;
   customers: typeof customers;
   fileStorage: typeof fileStorage;
@@ -47,8 +53,12 @@ declare const fullApi: ApiFromModules<{
   glassTypes: typeof glassTypes;
   heroMedia: typeof heroMedia;
   hr: typeof hr;
+  http: typeof http;
   inventory: typeof inventory;
+  marketing: typeof marketing;
+  marketingMeta: typeof marketingMeta;
   migrations: typeof migrations;
+  orders: typeof orders;
   payEntries: typeof payEntries;
   permissions: typeof permissions;
   productionJobs: typeof productionJobs;

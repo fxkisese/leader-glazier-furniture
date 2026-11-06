@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { recordWebsiteLead } from "./marketing";
 
 export const list = query({
   args: {},
@@ -31,9 +32,18 @@ export const create = mutation({
     location: v.optional(v.string()),
     description: v.optional(v.string()),
     status: v.optional(v.string()),
+    // Where the visitor came from (ad links carry utm_* tags); used for marketing, not stored on the request
+    utm_source: v.optional(v.string()),
+    utm_medium: v.optional(v.string()),
+    utm_campaign: v.optional(v.string()),
   },
-  handler: async (ctx, args) => {
-    return await ctx.db.insert("custom_order_requests", { status: "new", ...args });
+  handler: async (ctx, { utm_source, utm_medium, utm_campaign, ...args }) => {
+    const id = await ctx.db.insert("custom_order_requests", { status: "new", ...args });
+    await recordWebsiteLead(ctx, {
+      name: args.customer_name, phone: args.phone, product_interest: args.product_type,
+      notes: "Custom order request from the website", utm_source, utm_medium, utm_campaign,
+    });
+    return id;
   },
 });
 
