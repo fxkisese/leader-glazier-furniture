@@ -151,7 +151,7 @@ const SOFT = [249, 246, 242];
 
 /** Draws the invoice. `extra` = { note, payment } typed in the invoice dialog. Returns a jsPDF document. */
 export function drawInvoice({ jsPDF, logo }, inv, extra = {}) {
-  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const doc = new jsPDF({ unit: "mm", format: "a4", compress: true });
   const W = 210, M = 18, R = W - M;
   const ink = (c) => doc.setTextColor(...c);
   const font = (style, size) => { doc.setFont("helvetica", style); doc.setFontSize(size); };
@@ -261,6 +261,23 @@ export function drawInvoice({ jsPDF, logo }, inv, extra = {}) {
   };
   block("PAYMENT DETAILS", extra.payment);
   block("NOTE", extra.note);
+
+  // Sign-off: signature on a line at the bottom right, company stamp overlapping its left edge
+  if (extra.signature || extra.stamp) {
+    const fit = (a, x, y, w, h, alignBottom) => {
+      const s = Math.min(w / a.w, h / a.h);
+      const dw = a.w * s, dh = a.h * s;
+      doc.addImage(a.data, "PNG", x + (w - dw) / 2, alignBottom ? y + h - dh : y + (h - dh) / 2, dw, dh);
+    };
+    const sw = 60, sx = R - sw;
+    const top = Math.min(Math.max(ty + 14, ly + 6, 210), 234);
+    const lineY = top + 24;
+    if (extra.signature) fit(extra.signature, sx + 4, top, sw - 8, 23, true);
+    doc.setDrawColor(...INK); doc.setLineWidth(0.3); doc.line(sx, lineY, R, lineY);
+    font("normal", 8); ink(MUTED); doc.text("Authorised signature", sx, lineY + 4.5);
+    if (extra.signer) { font("bold", 9); ink(INK); doc.text(clean(extra.signer), sx, lineY + 9.5); }
+    if (extra.stamp) fit(extra.stamp, sx - 34, top - 8, 38, 38);
+  }
 
   // Footer
   const fy = 280;

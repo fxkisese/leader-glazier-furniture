@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Download, Eye, Mail, MessageCircle, Loader2 } from "lucide-react";
+import { Download, Eye, Mail, MessageCircle, Loader2, Stamp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, Modal, money } from "./businessShared";
 import { Pill, formatDate } from "./adminShared";
 import { loadInvoiceKit, drawInvoice, invoiceFileName, invoiceMessage, waPhone, BUSINESS } from "./invoice";
+import { readAsset, readSigner } from "./invoiceAssets";
+import StampSignatureSetup from "./StampSignatureSetup";
 
 const PAYMENT_PREF = "invoice-payment-details";
 const readPref = () => { try { return localStorage.getItem(PAYMENT_PREF) || ""; } catch { return ""; } };
@@ -21,6 +23,12 @@ export default function InvoiceDialog({ invoice, onClose }) {
   const [email, setEmail] = useState(invoice.client.email);
   const [note, setNote] = useState("");
   const [payment, setPayment] = useState(readPref);
+  const [stamp, setStamp] = useState(() => readAsset("stamp"));
+  const [signature, setSignature] = useState(() => readAsset("signature"));
+  const [signer, setSigner] = useState(readSigner);
+  const [signOff, setSignOff] = useState(true); // add stamp & signature to this invoice
+  const [setupOpen, setSetupOpen] = useState(false);
+  const hasMarks = !!(stamp || signature);
 
   useEffect(() => {
     let live = true;
@@ -36,7 +44,8 @@ export default function InvoiceDialog({ invoice, onClose }) {
 
   const build = () => {
     savePref(payment);
-    return drawInvoice(kit, inv, { note, payment });
+    const marks = signOff && hasMarks ? { stamp, signature, signer: signer.trim() } : {};
+    return drawInvoice(kit, inv, { note, payment, ...marks });
   };
 
   // Phones (and some desktops) can hand the PDF straight to WhatsApp, Gmail, etc.
@@ -144,6 +153,31 @@ export default function InvoiceDialog({ invoice, onClose }) {
       <Field label="Note to client" hint="Optional - delivery date, warranty, etc.">
         <Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Delivery on Saturday. 1-year warranty on frame." />
       </Field>
+      <div className="rounded-md border border-black/10">
+        <div className="flex items-center justify-between gap-3 px-3 py-2.5">
+          {hasMarks ? (
+            <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+              <input type="checkbox" checked={signOff} onChange={(e) => setSignOff(e.target.checked)} className="w-4 h-4 accent-obsidian" />
+              Add {stamp && signature ? "stamp & signature" : stamp ? "stamp" : "signature"}
+            </label>
+          ) : (
+            <span className="text-sm text-muted-foreground">No stamp or signature yet</span>
+          )}
+          <Button type="button" variant="ghost" size="sm" className="gap-1.5" onClick={() => setSetupOpen((o) => !o)}>
+            <Stamp className="w-4 h-4" /> {setupOpen ? "Done" : hasMarks ? "Change" : "Set up"}
+          </Button>
+        </div>
+        {setupOpen && (
+          <div className="border-t border-black/10 p-3">
+            <StampSignatureSetup
+              stamp={stamp} setStamp={setStamp}
+              signature={signature} setSignature={setSignature}
+              signer={signer} setSigner={setSigner}
+            />
+          </div>
+        )}
+      </div>
+
       <p className="text-xs text-muted-foreground">
         On a phone, WhatsApp and Email open your share menu with the PDF attached. On a computer the PDF downloads and the chat or email opens, so you can attach it.
       </p>
