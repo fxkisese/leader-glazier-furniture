@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Receipt, AlertCircle } from "lucide-react";
+import { Plus, Receipt, AlertCircle, FileText } from "lucide-react";
 import { base44, businessApi } from "@/api/base44Client";
 import { useStaff } from "@/lib/staffSession";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,8 @@ import {
 } from "./businessShared";
 import { INVENTORY_KEY } from "./AdminInventoryTab";
 import { CUSTOMERS_KEY } from "./AdminCustomersTab";
+import InvoiceDialog from "./InvoiceDialog";
+import { saleInvoice } from "./invoice";
 
 export const SALES_KEY = ["sales"];
 export const EXPENSES_KEY = ["expenses"];
@@ -26,6 +28,7 @@ const STATUS_TONE = { paid: "green", partial: "amber", unpaid: "red" };
 export default function AdminSalesTab() {
   const [period, setPeriod] = useState("this-month");
   const [modal, setModal] = useState(null); // null | "new" | sale
+  const [invoiceFor, setInvoiceFor] = useState(null); // sale
   const queryClient = useQueryClient();
   const { can } = useStaff();
   const canCosts = can("costs");
@@ -126,6 +129,7 @@ export default function AdminSalesTab() {
                   {canCosts && <th className="text-right font-medium px-4 py-2.5">Cost</th>}
                   {canCosts && <th className="text-right font-medium px-4 py-2.5">Profit</th>}
                   <th className="text-right font-medium px-4 py-2.5">Payment</th>
+                  <th className="px-2 py-2.5"><span className="sr-only">Invoice</span></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/5">
@@ -156,6 +160,12 @@ export default function AdminSalesTab() {
                         <Pill tone={STATUS_TONE[status] || "gray"}>{humanize(status)}{s.payment_method ? ` · ${humanize(s.payment_method)}` : ""}</Pill>
                         {balance(s) > 0 && <p className="text-xs text-red-600 mt-1">{money(balance(s))} due</p>}
                       </td>
+                      <td className="px-2 py-3 text-right">
+                        <Button variant="outline" size="sm" className="gap-1.5 h-8" title="Create invoice"
+                          onClick={(e) => { e.stopPropagation(); setInvoiceFor(s); }}>
+                          <FileText className="w-3.5 h-3.5" /> Invoice
+                        </Button>
+                      </td>
                     </tr>
                   );
                 })}
@@ -164,6 +174,14 @@ export default function AdminSalesTab() {
           </div>
         )}
       </Panel>
+
+      {invoiceFor && (
+        <InvoiceDialog
+          key={invoiceFor.id}
+          invoice={saleInvoice(invoiceFor, (customers.data || []).find((c) => c.id === invoiceFor.customer_id))}
+          onClose={() => setInvoiceFor(null)}
+        />
+      )}
 
       {modal && (
         <SaleModal

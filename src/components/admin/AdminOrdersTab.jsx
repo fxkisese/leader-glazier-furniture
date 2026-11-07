@@ -21,7 +21,10 @@ import {
   Clock,
   XCircle,
   AlertCircle,
+  FileText,
 } from "lucide-react";
+import InvoiceDialog from "./InvoiceDialog";
+import { orderInvoice } from "./invoice";
 
 const STATUS_COLORS = {
   pending:    { bg: "bg-amber-50",  text: "text-amber-700",  border: "border-amber-200", icon: Clock },
@@ -48,6 +51,7 @@ export default function AdminOrdersTab() {
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState(null);
   const [updating, setUpdating] = useState(null);
+  const [invoiceFor, setInvoiceFor] = useState(null); // order
 
   const { data: orders = [], isLoading: loading, isFetching, error, refetch } = useQuery({
     queryKey: ["orders"],
@@ -334,9 +338,14 @@ export default function AdminOrdersTab() {
                       </div>
                     </div>
 
-                    {/* Order ID */}
-                    <div className="mt-3 text-xs text-gray-400">
-                      Order ID: <span className="font-mono">{order.id}</span>
+                    {/* Order ID and invoice */}
+                    <div className="mt-3 flex items-center justify-between gap-3">
+                      <span className="text-xs text-gray-400">
+                        Order ID: <span className="font-mono">{order.id}</span>
+                      </span>
+                      <Button size="sm" variant="outline" className="rounded-full text-xs gap-1.5" onClick={() => setInvoiceFor(order)}>
+                        <FileText className="w-3.5 h-3.5" /> Invoice
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -344,6 +353,10 @@ export default function AdminOrdersTab() {
             );
           })}
         </div>
+      )}
+
+      {invoiceFor && (
+        <InvoiceDialog key={invoiceFor.id} invoice={orderInvoice(invoiceFor)} onClose={() => setInvoiceFor(null)} />
       )}
     </div>
   );
