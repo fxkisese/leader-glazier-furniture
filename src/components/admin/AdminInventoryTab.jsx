@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Boxes, Search, Copy } from "lucide-react";
+import { Plus, Boxes, Search, Copy, FileDown, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,8 @@ import {
   Field, NativeSelect, Modal, MiniStat, money, cents, num, today, itemCosts,
   CostLinesEditor, CostTypeRows, mainCostLines, editableLines, validCostLines, toCostLines,
 } from "./businessShared";
+import { loadInvoiceKit } from "./invoice";
+import { drawCostSheet, costSheetFileName } from "./costSheetPdf";
 
 export const INVENTORY_KEY = ["inventory-items"];
 
@@ -193,6 +195,33 @@ function CostSheetModal({ item, template, onCopy, onClose, onSaved }) {
     onError: (err) => toast.error("Save failed: " + (err.message || "Unknown error")),
   });
 
+  // Downloads what's on screen now, saved or not
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const downloadPdf = async () => {
+    setPdfBusy(true);
+    try {
+      const kit = await loadInvoiceKit();
+      const sheet = {
+        name: form.name.trim(),
+        category: form.category ? humanize(form.category) : "",
+        product: products.find((p) => p.id === form.product_id)?.name || "",
+        date: form.date,
+        made: form.quantity_made,
+        stock: isEdit ? form.stock_qty : "",
+        selling_price: form.selling_price,
+        notes: form.notes,
+        lines: toCostLines(lines),
+        costs,
+      };
+      drawCostSheet(kit, sheet).save(costSheetFileName(sheet));
+      toast.success("Cost sheet PDF downloaded");
+    } catch (e) {
+      toast.error("Couldn't make the PDF: " + (e.message || "check your connection"));
+    } finally {
+      setPdfBusy(false);
+    }
+  };
+
   const remove = useMutation({
     mutationFn: () => base44.entities.InventoryItem.delete(item.id),
     onSuccess: () => { toast.success("Cost sheet deleted"); onSaved(); },
@@ -206,7 +235,10 @@ function CostSheetModal({ item, template, onCopy, onClose, onSaved }) {
       onClose={onClose}
       footer={
         <>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" className="gap-2" onClick={downloadPdf} disabled={pdfBusy} title="Download this cost sheet as a PDF">
+              {pdfBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />} PDF
+            </Button>
             {isEdit && (
               <>
                 <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-white"

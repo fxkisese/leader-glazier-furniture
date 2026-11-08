@@ -106,13 +106,13 @@ export function invoiceMessage(inv) {
   return parts.join("\n");
 }
 
-const prettyDate = (iso) => {
+export const prettyDate = (iso) => {
   const d = new Date(`${iso}T12:00:00`);
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 };
 
 // Standard PDF fonts only cover Latin-1, so swap smart punctuation and drop anything else
-const clean = (s) => String(s ?? "")
+export const clean = (s) => String(s ?? "")
   .replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, "-").replace(/…/g, "...")
   .replace(/[^\x20-\x7E\xA0-\xFF\n]/g, "");
 
@@ -143,11 +143,11 @@ export function loadInvoiceKit() {
   return kitPromise;
 }
 
-const INK = [43, 33, 27];
-const GOLD = [176, 122, 69];
-const MUTED = [112, 102, 95];
-const RULE = [228, 222, 215];
-const SOFT = [249, 246, 242];
+export const INK = [43, 33, 27];
+export const GOLD = [176, 122, 69];
+export const MUTED = [112, 102, 95];
+export const RULE = [228, 222, 215];
+export const SOFT = [249, 246, 242];
 
 /** Draws the invoice. `extra` = { note, payment } typed in the invoice dialog. Returns a jsPDF document. */
 export function drawInvoice({ jsPDF, logo }, inv, extra = {}) {
