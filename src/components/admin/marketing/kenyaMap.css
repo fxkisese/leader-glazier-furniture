@@ -1,0 +1,48 @@
+/* Kenya map on the Marketing → Map tab. Loaded only with the map itself. */
+
+/* Leaflet's panes go up to z-index 1000; keep them under the admin's modals */
+.kenya-map {
+  position: relative;
+  isolation: isolate;
+}
+
+.kenya-map .leaflet-container {
+  height: 100%;
+  width: 100%;
+  background: #f4f1ec;
+  font: inherit;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* Background streets stay quiet so the county shading carries the picture */
+.kenya-map .kenya-tiles {
+  filter: grayscale(1);
+}
+
+.kenya-map .leaflet-control-attribution {
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.kenya-map .leaflet-interactive:focus {
+  outline: none;
+}
+
+.kenya-map.is-picking .leaflet-interactive,
+.kenya-map.is-picking .leaflet-grab {
+  cursor: crosshair;
+}
+
+.kenya-map .leaflet-tooltip {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #2b211b;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  padding: 6px 9px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.kenya-map .kenya-tip-title {
+  font-weight: 600;
+}

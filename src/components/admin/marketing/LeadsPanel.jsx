@@ -11,6 +11,7 @@ import {
   LEAD_SOURCES, LEAD_STATUSES, LOST_REASONS, PRODUCTS, BRANCHES, STATUS_TONE, Options, cap, ksh,
   nairobiDate, nairobiTime, toMs, useRefreshMarketing,
 } from "./shared";
+import LocationPicker from "./LocationPicker";
 
 const SOURCE_TONE = { meta_ad: "blue", organic_post: "purple", website: "amber", walk_in: "green", referral: "green" };
 const waLink = (phone) => `https://wa.me/${phone}`;
@@ -41,7 +42,7 @@ export default function LeadsPanel({ from, to }) {
   const rows = period.filter((l) =>
     (status === "all" || (status === "open" ? !["won", "lost"].includes(l.status) : l.status === status)) &&
     (!source || l.source_type === source) &&
-    (!q || [l.name, l.phone, l.product_interest, l.notes].some((x) => x?.toLowerCase().includes(q))));
+    (!q || [l.name, l.phone, l.product_interest, l.town, l.county, l.notes].some((x) => x?.toLowerCase().includes(q))));
 
   const campaignName = new Map((campaigns.data || []).map((c) => [c.id, c.name]));
   const adName = new Map((ads.data || []).map((a) => [a.id, a.name]));
@@ -83,7 +84,8 @@ export default function LeadsPanel({ from, to }) {
                     <span className="font-medium text-obsidian">{l.name || "No name"}</span>
                     {l.phone && <span className="text-muted-foreground"> · {l.phone}</span>}
                     <span className="block text-xs text-muted-foreground truncate">
-                      {[l.product_interest && cap(l.product_interest), l.campaign_id && campaignName.get(l.campaign_id), l.ad_id && adName.get(l.ad_id),
+                      {[l.product_interest && cap(l.product_interest), l.county && [l.town, l.county].filter(Boolean).join(", "),
+                        l.campaign_id && campaignName.get(l.campaign_id), l.ad_id && adName.get(l.ad_id),
                         l.status === "won" && l.sale_amount ? `Sold ${ksh(l.sale_amount)}` : null, l.status === "lost" && l.lost_reason ? `Lost: ${l.lost_reason}` : null,
                         l.notes].filter(Boolean).join(" · ")}
                     </span>
@@ -120,7 +122,7 @@ export default function LeadsPanel({ from, to }) {
   );
 }
 
-const OPTIONAL = ["name", "phone", "campaign_id", "ad_id", "post_id", "product_interest", "branch", "quoted_amount", "notes"];
+const OPTIONAL = ["name", "phone", "campaign_id", "ad_id", "post_id", "product_interest", "branch", "county", "town", "quoted_amount", "notes"];
 
 function LeadModal({ lead, campaigns, ads, posts, onClose, onSaved, onWon }) {
   const isEdit = !!lead;
@@ -128,7 +130,7 @@ function LeadModal({ lead, campaigns, ads, posts, onClose, onSaved, onWon }) {
   const [f, setF] = useState({
     name: src.name || "", phone: src.phone || "", source_type: src.source_type || "whatsapp",
     campaign_id: src.campaign_id || "", ad_id: src.ad_id || "", post_id: src.post_id || "",
-    product_interest: src.product_interest || "", branch: src.branch || "",
+    product_interest: src.product_interest || "", branch: src.branch || "", county: src.county || "", town: src.town || "",
     date: nairobiDate(src.received_at), time: nairobiTime(src.received_at), status: src.status || "new",
     quoted_amount: src.quoted_amount != null ? String(src.quoted_amount) : "", notes: src.notes || "",
   });
@@ -200,6 +202,8 @@ function LeadModal({ lead, campaigns, ads, posts, onClose, onSaved, onWon }) {
         <Field label="Branch"><NativeSelect value={f.branch} onChange={set("branch")}><Options values={BRANCHES} /></NativeSelect></Field>
         <Field label="Quoted (KSh)"><Input type="number" value={f.quoted_amount} onChange={set("quoted_amount")} /></Field>
       </div>
+      {/* Where the customer is — this is what puts the lead on the Map tab */}
+      <LocationPicker county={f.county} town={f.town} onChange={(place) => setF((x) => ({ ...x, ...place }))} />
       {isEdit && (
         <Field label="Status">
           <NativeSelect value={f.status} onChange={set("status")}>{LEAD_STATUSES.filter((s) => s !== "won" || lead.status === "won").map((s) => <option key={s} value={s}>{cap(s)}</option>)}</NativeSelect>

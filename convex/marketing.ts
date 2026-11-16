@@ -7,6 +7,7 @@ import { crud, requireAccess } from "./access";
 import { can } from "./permissions";
 import {
   mktCampaignFields, mktAdFields, mktSpendFields, mktPostFields, mktLeadFields, mktTeamFields,
+  mktGeoStatFields, mktPlaceFields,
 } from "./schema";
 
 const M = "marketing" as const;
@@ -74,6 +75,7 @@ export const removeCampaign = mutation({
       await ctx.db.delete(ad._id);
     }
     for (const s of (await ctx.db.query("mkt_ad_spend").collect()).filter((s) => s.campaign_id === id)) await ctx.db.delete(s._id);
+    for (const g of (await ctx.db.query("mkt_geo_stats").collect()).filter((g) => g.campaign_id === id)) await ctx.db.delete(g._id);
     for (const l of (await ctx.db.query("mkt_leads").collect()).filter((l) => l.campaign_id === id)) {
       await ctx.db.patch(l._id, { campaign_id: undefined, ad_id: undefined });
     }
@@ -425,6 +427,127 @@ export const report = query({
       from, to, show_pay: showPay, summary, campaigns: campaignRows, ads: adRows, content, sources, hours,
       lost_reasons: lostReasons, people,
       untagged_ads: allAds.filter((a) => !a.product || !a.hook || !a.creative_type).length,
+    };
+  },
+});
+
+// ── Map: results per county / town per month, and your own pins ──
+
+const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
+const nextMonth = (m: string) => {
+  const [y, mo] = m.split("-").map(Number);
+  return mo === 12 ? `${y + 1}-01` : `${y}-${String(mo + 1).padStart(2, "0")}`;
+};
+
+export const { list: listPlaces, remove: removePlace } = crud("mkt_places", M, mktPlaceFields);
+
+export const createPlace = mutation({
+  args: { token: v.string(), ...mktPlaceFields },
+  handler: async (ctx, { token, ...row }) => {
+    await requireAccess(ctx, token, M);
+    const name = row.name.trim().slice(0, 60);
+    if (!name || !row.county) throw new Error("Give the place a name.");
+    const twin = (await ctx.db.query("mkt_places").collect())
+      .find((p) => p.county === row.county && p.name.toLowerCase() === name.toLowerCase());
+    if (twin) throw new Error(`"${twin.name}" is already on the map in ${row.county}.`);
+    return await ctx.db.insert("mkt_places", { ...row, name });
+  },
+});
+
+/**
+ * Saves one month's numbers for a place. There is only ever one row per
+ * month + county + town + campaign, so entering the same combination again replaces it.
+ */
+export const saveGeoStat = mutation({
+  args: { token: v.string(), id: v.optional(v.id("mkt_geo_stats")), ...mktGeoStatFields },
+  handler: async (ctx, { token, id, ...row }) => {
+    await requireAccess(ctx, token, M);
+    if (!MONTH.test(row.month)) throw new Error("Pick a month.");
+    if (!row.county) throw new Error("Pick a county.");
+    const twin = (await ctx.db.query("mkt_geo_stats").withIndex("by_month", (q) => q.eq("month", row.month)).collect())
+      .find((s) => s._id !== id && s.county === row.county && s.town === row.town && s.campaign_id === row.campaign_id);
+    if (id) {
+      if (!(await ctx.db.get(id))) throw new Error("This entry no longer exists.");
+      await ctx.db.replace(id, row);
+      if (twin) await ctx.db.delete(twin._id);
+      return id;
+    }
+    if (twin) {
+      await ctx.db.replace(twin._id, row);
+      return twin._id;
+    }
+    return await ctx.db.insert("mkt_geo_stats", row);
+  },
+});
+
+export const removeGeoStat = mutation({
+  args: { token: v.string(), id: v.id("mkt_geo_stats") },
+  handler: async (ctx, { token, id }) => {
+    await requireAccess(ctx, token, M);
+    await ctx.db.delete(id);
+  },
+});
+
+/**
+ * Everything the Map tab needs for a run of months, totalled per county and per town.
+ * Spend / reach / clicks / chats are the numbers typed in on the map; leads, sales and revenue
+ * come from leads that have a county, counted by when the lead came in. A town's numbers
+ * also count toward its county.
+ */
+export const geoReport = query({
+  args: { token: v.string(), from_month: v.string(), to_month: v.string(), campaign_id: v.optional(v.id("mkt_campaigns")) },
+  handler: async (ctx, { token, from_month, to_month, campaign_id }) => {
+    await requireAccess(ctx, token, M);
+    if (!MONTH.test(from_month) || !MONTH.test(to_month)) throw new Error("Pick a month.");
+    const mine = (r: { campaign_id?: Id<"mkt_campaigns"> }) => !campaign_id || r.campaign_id === campaign_id;
+
+    const stats = (await ctx.db.query("mkt_geo_stats")
+      .withIndex("by_month", (q) => q.gte("month", from_month).lte("month", to_month)).collect()).filter(mine);
+    const leads = (await ctx.db.query("mkt_leads")
+      .withIndex("by_received", (q) => q.gte("received_at", dayStart(`${from_month}-01`)).lt("received_at", dayStart(`${nextMonth(to_month)}-01`)))
+      .collect()).filter(mine);
+
+    type Bucket = { spend: number; reach: number; clicks: number; messages: number; leads: number; won: number; revenue: number };
+    const blank = (): Bucket => ({ spend: 0, reach: 0, clicks: 0, messages: 0, leads: 0, won: 0, revenue: 0 });
+    const counties = new Map<string, Bucket>();
+    const towns = new Map<string, Bucket & { county: string; town: string }>();
+    const bucketsFor = (county: string, town?: string): Bucket[] => {
+      let c = counties.get(county);
+      if (!c) counties.set(county, (c = blank()));
+      if (!town) return [c];
+      let t = towns.get(`${county}|${town}`);
+      if (!t) towns.set(`${county}|${town}`, (t = { county, town, ...blank() }));
+      return [c, t];
+    };
+
+    for (const s of stats) {
+      for (const b of bucketsFor(s.county, s.town)) {
+        b.spend += s.spend || 0; b.reach += s.reach || 0; b.clicks += s.clicks || 0; b.messages += s.messages || 0;
+      }
+    }
+    let unlocated = 0;
+    for (const l of leads) {
+      if (!l.county) { unlocated++; continue; }
+      for (const b of bucketsFor(l.county, l.town)) {
+        b.leads++;
+        if (l.status === "won") { b.won++; b.revenue += l.sale_amount || 0; }
+      }
+    }
+
+    const finish = (b: Bucket) => ({
+      spend: round(b.spend), reach: b.reach, clicks: b.clicks, messages: b.messages, leads: b.leads, won: b.won, revenue: round(b.revenue),
+      cost_per_lead: ratio(b.spend, b.leads), cost_per_sale: ratio(b.spend, b.won), roas: ratio(b.revenue, b.spend),
+    });
+    const total = blank();
+    for (const b of counties.values()) for (const k of Object.keys(total) as (keyof Bucket)[]) total[k] += b[k];
+
+    return {
+      from_month, to_month,
+      counties: [...counties].map(([county, b]) => ({ county, ...finish(b) })),
+      towns: [...towns.values()].map((t) => ({ county: t.county, town: t.town, ...finish(t) })),
+      total: finish(total),
+      leads: leads.length, unlocated_leads: unlocated,
+      entries: stats.sort((a, b) => b.month.localeCompare(a.month) || a.county.localeCompare(b.county) || a.town.localeCompare(b.town)),
     };
   },
 });

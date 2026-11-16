@@ -8,12 +8,14 @@ import CampaignsPanel from "./marketing/CampaignsPanel";
 import PostsPanel from "./marketing/PostsPanel";
 import LeadsPanel from "./marketing/LeadsPanel";
 import TeamPanel from "./marketing/TeamPanel";
+import MapPanel from "./marketing/MapPanel";
 
 const TABS = [
   { value: "overview", label: "Overview" },
   { value: "campaigns", label: "Campaigns & Ads" },
   { value: "posts", label: "Posting & Content" },
   { value: "leads", label: "Leads" },
+  { value: "map", label: "Map" },
   { value: "team", label: "Team & Pay" },
 ];
 
@@ -41,10 +43,12 @@ export default function AdminMarketingTab() {
             </button>
           ))}
         </div>
-        <FilterChips options={MKT_PERIODS} value={period} onChange={setPeriod} />
+        {/* The Map tab works in whole months and has its own picker */}
+        {tab !== "map" && <FilterChips options={MKT_PERIODS} value={period} onChange={setPeriod} />}
       </div>
 
-      {report.isLoading ? <Panel><ListSkeleton /></Panel>
+      {tab === "map" ? <MapPanel go={setTab} />
+        : report.isLoading ? <Panel><ListSkeleton /></Panel>
         : report.error ? <Panel><ErrorState error={report.error} onRetry={report.refetch} /></Panel>
           : (
             <>

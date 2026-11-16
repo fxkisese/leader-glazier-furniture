@@ -64,6 +64,12 @@ export function useRefreshMarketing() {
   return () => queryClient.invalidateQueries({ queryKey: ["mkt"] });
 }
 
+// ── Map tab colours ──
+// County shading: one hue, light = little, dark = a lot. Pins use a different hue so they never read as shading.
+export const MAP_RAMP = ["#F0DCC0", "#E0BE94", "#CB9C64", "#A87038", "#74481C"];
+export const MAP_PIN = "#2A78D6";
+export const MAP_INK = "#2B211B";
+
 export const ksh = (n) => (n == null ? "—" : `KSh ${Math.round(Number(n) || 0).toLocaleString("en-KE")}`);
 export const roasText = (r) => (r == null ? "—" : `${r.toFixed(1)}×`);
 export const pct = (r) => (r == null ? "—" : `${r}%`);

@@ -114,6 +114,8 @@ export const mktCampaignFields = {
   end_date: v.optional(v.string()),
   daily_budget: v.optional(v.number()),
   notes: v.optional(v.string()),
+  // Where the campaign is aimed, marked on the Map tab. No town = the whole county.
+  target_areas: v.optional(v.array(v.object({ county: v.string(), town: v.optional(v.string()) }))),
 };
 
 export const mktAdFields = {
@@ -167,6 +169,8 @@ export const mktLeadFields = {
   utm_medium: v.optional(v.string()),
   utm_campaign: v.optional(v.string()),
   branch: v.optional(v.string()),
+  county: v.optional(v.string()), // where the customer is; puts the lead on the Map tab
+  town: v.optional(v.string()),
   product_interest: v.optional(v.string()),
   status: v.string(), // new | contacted | quoted | visited | won | lost
   lost_reason: v.optional(v.string()),
@@ -193,6 +197,28 @@ export const mktTeamFields = {
   employee_id: v.string(),
   daily_post_target: v.number(),
   active: v.boolean(),
+};
+
+// Ad results for one place in one month, typed in on the Map tab.
+// One row per month + county + town + campaign; saving the same combination again replaces it.
+export const mktGeoStatFields = {
+  month: v.string(), // YYYY-MM
+  county: v.string(), // one of the 47 county names in src/data/kenyaPlaces.js
+  town: v.string(), // "" for the county as a whole
+  campaign_id: v.optional(v.id("mkt_campaigns")), // unset = not tied to one campaign
+  spend: v.optional(v.number()),
+  reach: v.optional(v.number()),
+  clicks: v.optional(v.number()),
+  messages: v.optional(v.number()), // chats started
+  notes: v.optional(v.string()),
+};
+
+// Your own map pins, on top of the built-in town list.
+export const mktPlaceFields = {
+  name: v.string(),
+  county: v.string(),
+  lat: v.number(),
+  lng: v.number(),
 };
 
 export default defineSchema({
@@ -445,4 +471,6 @@ export default defineSchema({
   mkt_leads: defineTable(mktLeadFields).index("by_received", ["received_at"]).index("by_phone", ["phone"]),
   mkt_checkins: defineTable(mktCheckinFields).index("by_employee_date", ["employee_id", "date"]),
   mkt_team: defineTable(mktTeamFields).index("by_employee", ["employee_id"]),
+  mkt_geo_stats: defineTable(mktGeoStatFields).index("by_month", ["month"]),
+  mkt_places: defineTable(mktPlaceFields),
 });

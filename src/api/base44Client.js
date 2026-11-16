@@ -180,6 +180,13 @@ export const marketingApi = {
   setCheckin: (employee_id, date, flags) => authed((a) => client.mutation(api.marketing.setCheckin, a), { employee_id, date, ...flags }),
   syncMeta: (days = 3) => authed((a) => client.action(api.marketingMeta.syncNow, a), { days }),
   status: () => authed((a) => client.action(api.marketingMeta.status, a)),
+  // Map tab: totals per county / town for a run of months ("YYYY-MM")
+  geoReport: async (from_month, to_month, campaign_id) => {
+    const r = await authed((a) => client.query(api.marketing.geoReport, a), { from_month, to_month, ...(campaign_id ? { campaign_id } : {}) });
+    return { ...r, entries: r.entries.map(normalize) };
+  },
+  saveGeoStat: (row, id) => authed((a) => client.mutation(api.marketing.saveGeoStat, a), { ...clean(row), ...(id ? { id } : {}) }),
+  removeGeoStat: (id) => authed((a) => client.mutation(api.marketing.removeGeoStat, a), { id }),
 };
 
 // ─────────────────────────────────────────────────────────
@@ -385,6 +392,13 @@ export const base44 = {
       createMutation: api.marketing.createTeam,
       updateMutation: api.marketing.updateTeam,
       removeMutation: api.marketing.removeTeam,
+      auth: true,
+    }),
+    // Your own map pins: add and remove only
+    MktPlace: makeEntity({
+      listQuery: api.marketing.listPlaces,
+      createMutation: api.marketing.createPlace,
+      removeMutation: api.marketing.removePlace,
       auth: true,
     }),
 
