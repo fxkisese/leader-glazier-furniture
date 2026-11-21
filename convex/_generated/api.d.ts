@@ -20,6 +20,7 @@ import type * as heroMedia from "../heroMedia.js";
 import type * as hr from "../hr.js";
 import type * as http from "../http.js";
 import type * as inventory from "../inventory.js";
+import type * as invoiceMarks from "../invoiceMarks.js";
 import type * as marketing from "../marketing.js";
 import type * as marketingMeta from "../marketingMeta.js";
 import type * as migrations from "../migrations.js";
@@ -55,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   hr: typeof hr;
   http: typeof http;
   inventory: typeof inventory;
+  invoiceMarks: typeof invoiceMarks;
   marketing: typeof marketing;
   marketingMeta: typeof marketingMeta;
   migrations: typeof migrations;

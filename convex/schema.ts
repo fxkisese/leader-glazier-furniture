@@ -458,6 +458,15 @@ export default defineSchema({
     about_text: v.optional(v.string()),
   }),
 
+  // Stamp, signature and "signed by" line printed on PDF invoices. One row per kind.
+  // data = PNG data URL (images) or plain text (signer). Read only by signed-in staff.
+  invoice_marks: defineTable({
+    kind: v.string(), // "stamp" | "signature" | "signer"
+    data: v.string(),
+    w: v.optional(v.number()),
+    h: v.optional(v.number()),
+  }).index("by_kind", ["kind"]),
+
   quote_accessories: defineTable({
     quote_request_id: v.optional(v.string()),
     accessory_id: v.optional(v.string()),

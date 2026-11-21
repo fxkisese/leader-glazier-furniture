@@ -171,6 +171,16 @@ export const businessApi = {
   removePayslip: (id) => authed((a) => client.mutation(api.hr.removePayslip, a), { id }),
 };
 
+// Stamp / signature / signer on PDF invoices, shared across devices
+export const invoiceMarksApi = {
+  get: () => authed((a) => client.query(api.invoiceMarks.get, a)),
+  set: (kind, value) =>
+    authed((a) => client.mutation(api.invoiceMarks.set, a), {
+      kind,
+      ...(typeof value === "string" ? (value ? { data: value } : {}) : value ? { data: value.data, w: value.w, h: value.h } : {}),
+    }),
+};
+
 // Marketing: reports, pickers and the Meta sync
 export const marketingApi = {
   report: (from, to) => authed((a) => client.query(api.marketing.report, a), { from, to }),

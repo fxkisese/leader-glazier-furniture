@@ -4,6 +4,7 @@ import { Upload, PenLine, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "./businessShared";
+import { invoiceMarksApi } from "@/api/base44Client";
 import { canvasToAsset, fileToAsset, saveAsset, saveSigner } from "./invoiceAssets";
 
 // Light checkerboard so transparent images are visibly transparent
@@ -13,15 +14,25 @@ const CHECKER = {
   backgroundPosition: "0 0,0 6px,6px -6px,-6px 0",
 };
 
-/** Set up the stamp and signature printed on invoices. Values live in the parent; this stores them on the device. */
+/**
+ * Set up the stamp and signature printed on invoices. Values live in the parent; this saves them
+ * to the database (so every device gets them) and caches them in this browser.
+ */
 export default function StampSignatureSetup({ stamp, setStamp, signature, setSignature, signer, setSigner }) {
   const [drawing, setDrawing] = useState(false);
+  const [savedSigner, setSavedSigner] = useState(signer);
 
-  const store = (kind, asset, set) => {
-    if (!saveAsset(kind, asset)) {
-      toast.error("This browser couldn't save it (private browsing?). It will only be used for this invoice.");
-    }
+  // Returns true once the database has it
+  const store = async (kind, asset, set) => {
     set(asset);
+    saveAsset(kind, asset);
+    try {
+      await invoiceMarksApi.set(kind, asset);
+      return true;
+    } catch (err) {
+      toast.error(`Couldn't save to your account (${err.message}). It's kept on this device only for now.`);
+      return false;
+    }
   };
 
   const upload = (kind, set, maxSide) => async (e) => {
@@ -29,10 +40,21 @@ export default function StampSignatureSetup({ stamp, setStamp, signature, setSig
     e.target.value = "";
     if (!file) return;
     try {
-      store(kind, await fileToAsset(file, maxSide), set);
-      toast.success(kind === "stamp" ? "Stamp saved" : "Signature saved");
+      const asset = await fileToAsset(file, maxSide);
+      if (await store(kind, asset, set)) toast.success(kind === "stamp" ? "Stamp saved" : "Signature saved");
     } catch (err) {
       toast.error(err.message);
+    }
+  };
+
+  const saveSignerName = async () => {
+    const v = signer.trim();
+    if (v === savedSigner) return;
+    try {
+      await invoiceMarksApi.set("signer", v);
+      setSavedSigner(v);
+    } catch (err) {
+      toast.error(`Couldn't save the name (${err.message})`);
     }
   };
 
@@ -65,14 +87,22 @@ export default function StampSignatureSetup({ stamp, setStamp, signature, setSig
       {drawing && (
         <SignaturePad
           onCancel={() => setDrawing(false)}
-          onSave={(asset) => { store("signature", asset, setSignature); setDrawing(false); toast.success("Signature saved"); }}
+          onSave={async (asset) => {
+            setDrawing(false);
+            if (await store("signature", asset, setSignature)) toast.success("Signature saved");
+          }}
         />
       )}
 
       <Field label="Signed by" hint="Printed under the signature, e.g. your name and title">
-        <Input value={signer} onChange={(e) => { setSigner(e.target.value); saveSigner(e.target.value); }} placeholder="e.g. Jane Doe, Director" />
+        <Input
+          value={signer}
+          onChange={(e) => { setSigner(e.target.value); saveSigner(e.target.value); }}
+          onBlur={saveSignerName}
+          placeholder="e.g. Jane Doe, Director"
+        />
       </Field>
-      <p className="text-xs text-muted-foreground">Saved on this device only, never uploaded. Set them up once on each phone or computer you invoice from.</p>
+      <p className="text-xs text-muted-foreground">Saved to your business account, so they appear on every phone or computer you sign in on. Only signed-in staff can see them.</p>
     </div>
   );
 }

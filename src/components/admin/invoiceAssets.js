@@ -1,5 +1,6 @@
-// Stamp and signature images for invoices. Kept in this browser only (never uploaded),
-// so a signature never sits at a public URL.
+// Stamp and signature images for invoices. The database copy (invoiceMarksApi) is the source
+// of truth so every device gets them; this browser copy is just a cache for instant loading.
+// Stored as data, never in file storage, so a signature never sits at a public URL.
 
 const KEYS = { stamp: "invoice-stamp", signature: "invoice-signature", signer: "invoice-signer" };
 
@@ -83,12 +84,24 @@ function trim(canvas) {
   return out;
 }
 
+const MAX_CHARS = 850_000; // stays under the database's 1 MB per record
+
 /** Cleans up a drawn or photographed canvas into a stored asset. */
 export function canvasToAsset(canvas) {
   knockOutPaper(canvas);
-  const c = trim(canvas);
+  let c = trim(canvas);
   if (!c) throw new Error("The image looks empty");
-  return { data: c.toDataURL("image/png"), w: c.width, h: c.height };
+  let data = c.toDataURL("image/png");
+  // Noisy photos can make big PNGs: shrink until it fits
+  while (data.length > MAX_CHARS && c.width > 80) {
+    const s = document.createElement("canvas");
+    s.width = Math.round(c.width * 0.75);
+    s.height = Math.round(c.height * 0.75);
+    s.getContext("2d").drawImage(c, 0, 0, s.width, s.height);
+    c = s;
+    data = c.toDataURL("image/png");
+  }
+  return { data, w: c.width, h: c.height };
 }
 
 export async function fileToAsset(file, maxSide = 600) {

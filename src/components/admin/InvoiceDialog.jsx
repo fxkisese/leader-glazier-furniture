@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Field, Modal, money } from "./businessShared";
 import { Pill, formatDate } from "./adminShared";
 import { loadInvoiceKit, drawInvoice, invoiceFileName, invoiceMessage, waPhone, BUSINESS } from "./invoice";
-import { readAsset, readSigner } from "./invoiceAssets";
+import { invoiceMarksApi } from "@/api/base44Client";
+import { readAsset, readSigner, saveAsset, saveSigner } from "./invoiceAssets";
 import StampSignatureSetup from "./StampSignatureSetup";
 
 const PAYMENT_PREF = "invoice-payment-details";
@@ -29,6 +30,31 @@ export default function InvoiceDialog({ invoice, onClose }) {
   const [signOff, setSignOff] = useState(true); // add stamp & signature to this invoice
   const [setupOpen, setSetupOpen] = useState(false);
   const hasMarks = !!(stamp || signature);
+
+  // The browser copy shows instantly; the account copy (shared by all devices) then replaces it.
+  // Anything only on this device (set up before marks were saved to the account) gets uploaded.
+  useEffect(() => {
+    let live = true;
+    const local = { stamp, signature, signer };
+    invoiceMarksApi.get().then(
+      (saved) => {
+        if (!live) return;
+        const apply = (kind, value, set, cache) => {
+          if (value) {
+            cache(value);
+            set((cur) => (cur === local[kind] ? value : cur)); // don't clobber an edit made meanwhile
+          } else if (local[kind]) {
+            invoiceMarksApi.set(kind, local[kind]).catch(() => {});
+          }
+        };
+        apply("stamp", saved.stamp, setStamp, (v) => saveAsset("stamp", v));
+        apply("signature", saved.signature, setSignature, (v) => saveAsset("signature", v));
+        apply("signer", saved.signer, setSigner, saveSigner);
+      },
+      () => { /* offline or signed out: keep the browser copy */ },
+    );
+    return () => { live = false; };
+  }, []);
 
   useEffect(() => {
     let live = true;
