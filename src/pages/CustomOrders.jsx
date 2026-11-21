@@ -8,6 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { uploadImage } from "@/api/imageUpload";
 import { getAttribution } from "@/lib/attribution";
+import { trackLead } from "@/lib/pixel";
 import { toast } from "sonner";
 
 const WHATSAPP = "254110767199";
@@ -43,7 +44,7 @@ export default function CustomOrders() {
 
   const submitMutation = useMutation({
     mutationFn: () => base44.entities.CustomOrderRequest.create({ ...form, reference_image: image, ...getAttribution() }),
-    onSuccess: () => setSubmitted(true),
+    onSuccess: () => { trackLead("Custom Order Request"); setSubmitted(true); },
     onError: () => toast.error("Could not submit. Please try WhatsApp instead."),
   });
 

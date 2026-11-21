@@ -1,9 +1,20 @@
-import { Suspense } from "react";
-import { Outlet } from "react-router-dom";
+import { Suspense, useEffect, useRef } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import WhatsAppFab from "../ui/WhatsAppFab";
 import CartSidebar from "../cart/CartSidebar";
+import { trackPageView } from "@/lib/pixel";
+
+/** Meta Pixel PageView on every in-app navigation. index.html already sends the first one. */
+function usePixelPageViews() {
+  const { pathname } = useLocation();
+  const isFirst = useRef(true);
+  useEffect(() => {
+    if (isFirst.current) { isFirst.current = false; return; }
+    trackPageView();
+  }, [pathname]);
+}
 
 const PageLoader = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
@@ -12,6 +23,7 @@ const PageLoader = () => (
 );
 
 export default function Layout() {
+  usePixelPageViews();
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

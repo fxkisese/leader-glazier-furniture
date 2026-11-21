@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { trackInitiateCheckout, trackPurchase } from "@/lib/pixel";
 
 const SUPABASE_FUNCTIONS_URL = import.meta.env.VITE_SUPABASE_FUNCTIONS_URL || `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
 const STRIPE_PK = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
@@ -162,6 +163,17 @@ export default function CheckoutModal({ product, cartItems, onClose }) {
   const set = (k, v) => setCustomerInfo((prev) => ({ ...prev, [k]: v }));
 
   const isDetailsValid = customerInfo.customer_name.trim() && customerInfo.customer_phone.trim();
+
+  /* ── Meta Pixel: opening the checkout once per modal ── */
+  useEffect(() => {
+    if (targetItems.length) trackInitiateCheckout(targetItems, actualPrice);
+  }, []);
+
+  /* ── Meta Pixel: a confirmed payment (M-Pesa or card) ── */
+  useEffect(() => {
+    if (step !== "success") return;
+    trackPurchase(targetItems, Number(result?.amount_paid) || payAmount, result?.order_id);
+  }, [step]);
 
   /* ── M-Pesa STK Push ── */
   const handleMpesaPay = async () => {

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Phone, MessageCircle, MapPin, Mail, Send, CheckCircle2, Facebook, Instagram, Twitter } from "lucide-react";
+import { trackLead } from "@/lib/pixel";
 
 const WHATSAPP = "254110767199";
 
@@ -14,6 +15,7 @@ export default function Contact() {
 
   const handleSend = () => {
     if (!form.name || !form.message) return;
+    trackLead("Contact Form");
     window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(waMsg)}`, "_blank");
     setSent(true);
   };

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calculator, MessageCircle, Phone, Save, MapPin } from "lucide-react";
+import { trackLead } from "@/lib/pixel";
 import { toast } from "sonner";
 
 const WHATSAPP = "254110767199";
@@ -107,7 +108,7 @@ export default function QuoteCalculator() {
       delivery_location: deliveryLocation,
       estimated_total: quote.total,
     }),
-    onSuccess: () => toast.success("Quote saved! We'll be in touch."),
+    onSuccess: () => { trackLead("Glass Quote", quote?.total); toast.success("Quote saved! We'll be in touch."); },
   });
 
   const waText = quote
