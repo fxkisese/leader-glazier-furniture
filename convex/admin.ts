@@ -167,6 +167,13 @@ export const { list: listExpenses, create: createExpense, update: updateExpense,
     notes: v.optional(v.string()),
   });
 
+// ────────── Profit targets (CEO dashboard) ──────────
+export const { list: listProfitTargets, create: createProfitTarget, update: updateProfitTarget, remove: removeProfitTarget } =
+  crud("profit_targets", "dashboard", {
+    month: v.string(),
+    amount: v.number(),
+  });
+
 // ────────── Accessories ──────────
 export const listAccessories = query({
   args: {},

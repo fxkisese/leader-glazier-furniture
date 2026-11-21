@@ -10,6 +10,7 @@ import { SALES_KEY, EXPENSES_KEY } from "./AdminSalesTab";
 import { INVENTORY_KEY } from "./AdminInventoryTab";
 import { PURCHASES_KEY } from "./AdminSuppliersTab";
 import { JOBS_KEY, isOverdue } from "./AdminProductionTab";
+import ProfitTracker from "./ProfitTracker";
 
 // Validated categorical slots 1 & 2 (blue, orange) on the white panel surface
 const SALES_COLOR = "#2a78d6";
@@ -106,6 +107,8 @@ export default function AdminCeoDashboard({ go }) {
         <MiniStat label="Stock value (at cost)" value={v(money(stockValue))} sub={`${I.reduce((t, i) => t + Math.max(num(i.stock_qty), 0), 0)} units on hand`} />
         <MiniStat label="Wages" value={v(money(k.wages))} sub={people.data ? `${people.data.length} active staff` : "Paid through payroll"} />
       </div>
+
+      <ProfitTracker sales={S} expenses={E} loading={loading} />
 
       <div className="grid xl:grid-cols-3 gap-6 mb-6">
         <Panel className="xl:col-span-2 p-5">

@@ -344,6 +344,14 @@ export const base44 = {
       removeMutation: api.admin.removeCreditCustomer,
     }),
 
+    ProfitTarget: makeEntity({
+      listQuery: api.admin.listProfitTargets,
+      createMutation: api.admin.createProfitTarget,
+      updateMutation: api.admin.updateProfitTarget,
+      removeMutation: api.admin.removeProfitTarget,
+      auth: true,
+    }),
+
     Expense: makeEntity({
       listQuery: api.admin.listExpenses,
       createMutation: api.admin.createExpense,

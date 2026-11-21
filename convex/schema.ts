@@ -421,6 +421,12 @@ export default defineSchema({
     notes: v.optional(v.string()),
   }).index("by_category", ["category"]),
 
+  // Monthly net profit goal for the CEO dashboard's profit tracker. month = "YYYY-MM"
+  profit_targets: defineTable({
+    month: v.string(),
+    amount: v.number(),
+  }),
+
   accessories: defineTable({
     name: v.string(),
     category: v.optional(v.string()),
