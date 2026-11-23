@@ -220,15 +220,12 @@ function SignaturePad({ onSave, onCancel }) {
 
   return (
     <div className="rounded-md border border-black/10 p-3 space-y-2">
-      <p className="text-sm font-medium text-obsidian">Sign below with your finger or mouse</p>
-      <div className="relative">
-        <canvas
-          ref={canvasRef}
-          className="w-full h-40 rounded bg-white border border-black/15 touch-none cursor-crosshair"
-          onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
-        />
-        <div className="pointer-events-none absolute left-6 right-6 bottom-8 border-b border-black/20" />
-      </div>
+      <p className="text-sm font-medium text-obsidian">Sign anywhere in the box with your finger or mouse</p>
+      <canvas
+        ref={canvasRef}
+        className="block w-full h-64 sm:h-80 rounded bg-white border border-black/15 touch-none cursor-crosshair"
+        onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
+      />
       <div className="flex justify-between gap-2">
         <Button type="button" variant="ghost" size="sm" onClick={clear}>Clear</Button>
         <div className="flex gap-2">
