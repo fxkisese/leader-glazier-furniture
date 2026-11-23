@@ -156,31 +156,59 @@ function SignaturePad({ onSave, onCancel }) {
     ctx.strokeStyle = "#1c2a5e"; // pen blue
   }, []);
 
+  // last.current holds the stroke in progress: { rect, pts: [last two points], mid: where the drawn curve ends }
   const point = (e) => {
-    const r = canvasRef.current.getBoundingClientRect();
+    const r = last.current.rect;
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   };
-  const down = (e) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    last.current = point(e);
+  const midpoint = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+
+  // Curve through the midpoints, using each sampled point as the control point, so the line has no corners
+  const addPoint = (p) => {
+    const s = last.current;
+    const prev = s.pts[s.pts.length - 1];
+    if (Math.hypot(p.x - prev.x, p.y - prev.y) < 1) return; // skip tiny jitter
+    const mid = midpoint(prev, p);
     const ctx = canvasRef.current.getContext("2d");
     ctx.beginPath();
-    ctx.arc(last.current.x, last.current.y, 1.2, 0, Math.PI * 2);
+    ctx.moveTo(s.mid.x, s.mid.y);
+    ctx.quadraticCurveTo(prev.x, prev.y, mid.x, mid.y);
+    ctx.stroke();
+    s.pts = [prev, p];
+    s.mid = mid;
+  };
+
+  const down = (e) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    last.current = { rect: canvasRef.current.getBoundingClientRect() };
+    const p = point(e);
+    last.current.pts = [p];
+    last.current.mid = p;
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, ctx.lineWidth / 2, 0, Math.PI * 2);
     ctx.fillStyle = ctx.strokeStyle;
     ctx.fill();
     setEmpty(false);
   };
   const move = (e) => {
     if (!last.current) return;
-    const p = point(e);
+    // Browsers merge fast movements into one event per frame; the merged samples give a much finer path
+    const samples = e.nativeEvent.getCoalescedEvents?.() || [];
+    for (const ev of samples.length ? samples : [e.nativeEvent]) addPoint(point(ev));
+  };
+  const up = () => {
+    const s = last.current;
+    if (!s) return;
+    // Finish the line from the last midpoint to where the pen actually lifted
+    const end = s.pts[s.pts.length - 1];
     const ctx = canvasRef.current.getContext("2d");
     ctx.beginPath();
-    ctx.moveTo(last.current.x, last.current.y);
-    ctx.lineTo(p.x, p.y);
+    ctx.moveTo(s.mid.x, s.mid.y);
+    ctx.lineTo(end.x, end.y);
     ctx.stroke();
-    last.current = p;
+    last.current = null;
   };
-  const up = () => { last.current = null; };
   const clear = () => {
     const c = canvasRef.current;
     c.getContext("2d").clearRect(0, 0, c.width, c.height);
@@ -197,7 +225,7 @@ function SignaturePad({ onSave, onCancel }) {
         <canvas
           ref={canvasRef}
           className="w-full h-40 rounded bg-white border border-black/15 touch-none cursor-crosshair"
-          onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onPointerLeave={up}
+          onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
         />
         <div className="pointer-events-none absolute left-6 right-6 bottom-8 border-b border-black/20" />
       </div>
